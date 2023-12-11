@@ -1,4 +1,3 @@
-import numpy as np
 import scipy.sparse as sp
 from qiskit import QuantumCircuit
 from qiskit_aer import AerSimulator

@@ -4,10 +4,9 @@ from qiskit import QuantumCircuit, transpile
 from qiskit.quantum_info import Operator
 from qiskit_aer import AerSimulator
 
-from backend.cpu import CPUBackend
-from frontend.clock import ClockFrontend
+from backend.cpu import *
+from frontend.clock import *
 from interpreter import Interpreter
-from interpreter.compress import *
 
 from typing import Literal
 
@@ -122,10 +121,8 @@ class AdiabaticInterpreter(Interpreter):
 
         n = adiabatic_program.num_comp
         L = adiabatic_program.num_clock
-        print(f"{n} = n, {L} = L")
 
         res = CPUBackend().run(adiabatic_program, num_shots=num_shots)
-        print(res)
 
         # interpret the results
         if qubit_map:

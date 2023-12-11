@@ -4,6 +4,7 @@ import numpy as np
 import scipy.sparse as sp
 
 from frontend import *
+from frontend.compress import *
 
 
 class ClockFrontend(Frontend):
