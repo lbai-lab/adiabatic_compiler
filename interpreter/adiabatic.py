@@ -130,7 +130,7 @@ class AdiabaticInterpreter(Interpreter):
             for k, v in res.items():
                 if v:
                     key = ""
-                    for i in self.qubit_map:
+                    for i in qubit_map:
                         key += k[i]
                     key += k[n:]
                     new_res[key] = v
