@@ -223,26 +223,3 @@ def compile_expr(expr: HamExpr) -> sp.spmatrix:
         return sp.kron(res + res.conj().transpose(), sp.eye(2**expr.back_i))
     else:
         raise ValueError(f"Shouldn't happen ... {type(expr)}")
-
-
-# this class should handle properties related to adiabatic evolution
-# one example is the interpolation, currently it is only linear
-class AdiabaticProgram:
-    def __init__(
-        self,
-        num_comp: int,
-        num_clock: int,
-        H_init: HamExpr,
-        H_final: HamExpr,
-        total_time: float,
-        time_steps: int,
-    ):
-        self.num_comp = num_comp
-        self.num_clock = num_clock
-        self.H_init = H_init
-        self.H_final = H_final
-        self.total_time = total_time
-        self.time_steps = time_steps
-
-    def compile(self):
-        return compile_expr(self.H_init), compile_expr(self.H_final)

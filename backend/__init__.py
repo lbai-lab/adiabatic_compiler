@@ -7,7 +7,7 @@ class Backend:
     def __init__(self):
         pass
 
-    def run(self, adiabatic_program: AdiabaticProgram, num_shots: int) -> dict:
+    def run(self, adiabatic_program, num_shots) -> dict:
         """Produce an executable for a simulator from a program.
 
         Args:

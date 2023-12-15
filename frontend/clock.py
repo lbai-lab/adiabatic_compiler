@@ -5,6 +5,7 @@ import scipy.sparse as sp
 
 from frontend import *
 from frontend.compress import *
+from hamiltonian_lang import *
 
 
 class ClockFrontend(Frontend):
@@ -247,7 +248,7 @@ class ClockFrontend(Frontend):
         # H_constant = Summation([H_input, KronDiagonal(Identity(n), H_clock)])
         H_constant = Summation([H_input, H_clock])
 
-        return AdiabaticProgram(
+        return ClockAdiabaticProgram(
             n,
             L,
             Summation([H_clockinit, H_constant]),
