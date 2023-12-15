@@ -19,9 +19,9 @@ class CPUBackend(Backend):
         )
 
         if isinstance(adiabatic_program, PlanarAdiabaticProgram):
-            num_all = 2 * 3 * adiabatic_program.num_comp * adiabatic_program.num_round
+            raise NotImplementedError()
         else:
-            num_all = adiabatic_program.num_comp + adiabatic_program.num_clock
+            num_all = adiabatic_program.num_state + adiabatic_program.num_clock
         qc = QuantumCircuit(num_all)
         q_range = list(range(num_all))
         # Hamiltonian Gate is not used because it is slower

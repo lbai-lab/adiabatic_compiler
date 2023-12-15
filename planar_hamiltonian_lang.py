@@ -166,28 +166,27 @@ class Grid:
         self.rows = rows
         self.cols = cols
         self.H = H
-        self.grid: dict[tuple, list] = {}
+        self.grid: dict[tuple[int, int], list[PlanarHamExpr]] = {}
         self._gridify()
 
     def _gridify(self):
         for r in range(1, self.rows + 1):
             for c in range(0, self.cols + 1):
-                self.grid[(r, c)] = []
+                self.grid[r, c] = []
 
         def go(H: PlanarHamExpr):
-            print(type(H), H.row, H.col)
             if isinstance(H, Identity):
-                self.grid[(H.row, H.col)].append(H)
+                self.grid[H.row, H.col].append(H)
             elif isinstance(H, SingProj):
-                self.grid[(H.row, H.col)].append(H)
+                self.grid[H.row, H.col].append(H)
             elif isinstance(H, HorizProj):
-                self.grid[(H.row, H.col)].append(H)
+                self.grid[H.row, H.col].append(H)
             elif isinstance(H, VertProj):
-                self.grid[(H.row, H.col)].append(H)
+                self.grid[H.row, H.col].append(H)
             elif isinstance(H, HorizSymProject):
-                self.grid[(H.row, H.col)].append(H)
+                self.grid[H.row, H.col].append(H)
             elif isinstance(H, VertSymUnitary):
-                self.grid[(H.row, H.col)].append(H)
+                self.grid[H.row, H.col].append(H)
             elif isinstance(H, Sum):
                 for H2 in H.Hs:
                     go(H2)
@@ -288,16 +287,16 @@ def is_horiz(H: PlanarHamExpr, inc_sing=False) -> bool:
 #     return Grid(rows, cols, H).grid
 
 
-def gridify_vert(
-    R: int, C: int, H: PlanarHamExpr
-) -> dict[tuple[int, int], PlanarHamExpr]:
-    return Grid(R, C, H).filter(lambda x: is_vert(x, inc_sing=False))
+# def gridify_vert(
+#     R: int, C: int, H: PlanarHamExpr
+# ) -> dict[tuple[int, int], PlanarHamExpr]:
+#     return Grid(R, C, H).filter(lambda x: is_vert(x, inc_sing=False))
 
 
-def gridify_horiz(
-    R: int, C: int, H: PlanarHamExpr
-) -> dict[tuple[int, int], PlanarHamExpr]:
-    return Grid(R, C, H).filter(lambda x: is_horiz(x, inc_sing=False))
+# def gridify_horiz(
+#     R: int, C: int, H: PlanarHamExpr
+# ) -> dict[tuple[int, int], PlanarHamExpr]:
+#     return Grid(R, C, H).filter(lambda x: is_horiz(x, inc_sing=False))
 
 
 #

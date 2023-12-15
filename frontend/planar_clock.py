@@ -268,4 +268,8 @@ gates.append(Operator(QuantumCircuit(1)))
 
 program = PlanarClockFrontend().unitaries_to_program([sp.csc_matrix(x) for x in gates])
 
-Grid(program.num_clock, program.num_round + 1, program.H_final)
+grid = Grid(program.num_state, program.num_round + 1, program.H_final).grid
+
+for k,v in grid.items():
+    if v:
+        print(k)

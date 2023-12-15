@@ -7,14 +7,14 @@ from planar_hamiltonian_lang import PlanarHamExpr, reify3
 class ClockAdiabaticProgram:
     def __init__(
         self,
-        num_comp: int,
+        num_state: int,
         num_clock: int,
         H_init: HamExpr,
         H_final: HamExpr,
         total_time: float,
         time_steps: int,
     ):
-        self.num_comp = num_comp
+        self.num_state = num_state
         self.num_clock = num_clock
         self.H_init = H_init
         self.H_final = H_final
@@ -28,7 +28,7 @@ class ClockAdiabaticProgram:
 class PlanarAdiabaticProgram:
     def __init__(
         self,
-        num_comp: int,
+        num_state: int,
         num_round: int,
         num_clock: int,
         H_init: PlanarHamExpr,
@@ -36,7 +36,7 @@ class PlanarAdiabaticProgram:
         total_time: float,
         time_steps: int,
     ):
-        self.num_comp = num_comp
+        self.num_state = num_state
         self.num_round = num_round
         self.num_clock = num_clock
         self.H_init = H_init
@@ -46,8 +46,8 @@ class PlanarAdiabaticProgram:
 
     def compile(self):
         return (
-            reify3(self.num_comp, self.num_round, self.H_init),
-            reify3(self.num_comp, self.num_round, self.H_final),
+            reify3(self.num_state, self.num_round, self.H_init),
+            reify3(self.num_state, self.num_round, self.H_final),
         )
 
 

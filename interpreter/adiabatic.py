@@ -119,7 +119,7 @@ class AdiabaticInterpreter(Interpreter):
             [sp.csc_matrix(Operator(x)) for x in gates]
         )
 
-        n = adiabatic_program.num_comp
+        n = adiabatic_program.num_state
         L = adiabatic_program.num_clock
 
         res = CPUBackend().run(adiabatic_program, num_shots=num_shots)
