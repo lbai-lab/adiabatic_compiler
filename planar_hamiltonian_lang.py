@@ -33,13 +33,11 @@ class PlanarHamExpr:
         (r=2, c=0)  (r=2, c=1)  (r=2, c=2)
     """
 
-    def __init__(self, row=None, col=None, scalar=1) -> None:
+    def __init__(self, row=None, col=None) -> None:
         assert isinstance(row, int) or row is None
         assert isinstance(col, int) or col is None
-        assert isinstance(scalar, int) or isinstance(scalar, float)
         self.row = row
         self.col = col
-        self.scalar = scalar
 
 
 class Identity(PlanarHamExpr):
@@ -48,9 +46,12 @@ class Identity(PlanarHamExpr):
     I
     """
 
-    def __init__(self, n: int, row=None, col=None) -> None:
+    def __init__(self, n: int, row: int, col: int) -> None:
         super().__init__(row=row, col=col)
         self.n = n
+
+    def __str__(self):
+        return f"I({self.n})_({self.row}, {self.col})"
 
 
 class SingProj(PlanarHamExpr):
@@ -59,9 +60,12 @@ class SingProj(PlanarHamExpr):
     |p><p|
     """
 
-    def __init__(self, state: str, row=None, col=None, scalar=1) -> None:
-        super().__init__(row=row, col=col, scalar=scalar)
+    def __init__(self, state: str, row: int, col: int) -> None:
+        super().__init__(row, col)
         self.state = state
+
+    def __str__(self) -> str:
+        return f"P({self.state})_{self.row, self.col}"
 
 
 class VertProj(PlanarHamExpr):
@@ -71,16 +75,13 @@ class VertProj(PlanarHamExpr):
     |p_2 > < p_2|
     """
 
-    def __init__(self, state1: str, state2: str, row=None, col=None, scalar=1) -> None:
-        super().__init__(row=row, col=col, scalar=scalar)
+    def __init__(self, state1: str, state2: str, row: int, col: int) -> None:
+        super().__init__(row, col)
         self.state1 = state1
         self.state2 = state2
 
     def __str__(self) -> str:
-        if self.scalar == 1:
-            return f"HP({self.state1}, {self.state2})_({self.row}, {self.col})"
-        else:
-            return f"{self.scalar} * VP({self.state1}, {self.state2})_({self.row}, {self.col})"
+        return f"VP({self.state1}, {self.state2})_({self.row}, {self.col})"
 
 
 class HorizProj(PlanarHamExpr):
@@ -89,16 +90,13 @@ class HorizProj(PlanarHamExpr):
     |p_1 p_2> <p_1 p_2|
     """
 
-    def __init__(self, state1: str, state2: str, row=None, col=None, scalar=1) -> None:
-        super().__init__(row=row, col=col, scalar=scalar)
+    def __init__(self, state1: str, state2: str, row: int, col: int) -> None:
+        super().__init__(row, col)
         self.state1 = state1
         self.state2 = state2
 
     def __str__(self) -> str:
-        if self.scalar == 1:
-            return f"HP({self.state1}, {self.state2})_({self.row}, {self.col})"
-        else:
-            return f"{self.scalar} * HP({self.state1}, {self.state2})_({self.row}, {self.col})"
+        return f"HP({self.state1}, {self.state2})_({self.row}, {self.col})"
 
 
 class HorizSymProject(PlanarHamExpr):
@@ -108,17 +106,14 @@ class HorizSymProject(PlanarHamExpr):
     """
 
     def __init__(
-        self, states1: List[str], states2: List[str], row=None, col=None, scalar=1
+        self, states1: List[str], states2: List[str], row: int, col: int
     ) -> None:
-        super().__init__(row=row, col=col, scalar=scalar)
+        super().__init__(row, col)
         self.states1 = states1
         self.states2 = states2
 
     def __str__(self):
-        if self.scalar == 1:
-            return f"SP({self.orient}, {self.states1}, {self.states2})_({self.row}, {self.col})"
-        else:
-            return f"{self.scalar} * SP({self.orient}, {self.states1}, {self.states2})_({self.row}, {self.col})"
+        return f"SP({self.orient}, {self.states1}, {self.states2})_({self.row}, {self.col})"
 
 
 class VertSymUnitary(PlanarHamExpr):
@@ -128,29 +123,29 @@ class VertSymUnitary(PlanarHamExpr):
     U^\dagger   0
     """
 
-    def __init__(self, U: sp.spmatrix, row=None, col=None, scalar=1) -> None:
-        super().__init__(row=row, col=col, scalar=scalar)
+    def __init__(self, U: sp.spmatrix, row: int, col: int) -> None:
+        super().__init__(row, col)
         self.U = U
 
     def __str__(self) -> str:
-        if self.scalar == 1:
-            return f"U_{self.row, self.col}"
-        else:
-            return f"{self.scalar} * U_{self.row, self.col}"
+        return f"U_{self.row, self.col}"
 
 
 class Sum(PlanarHamExpr):
     """Sum of 2-local Hamiltonians."""
 
-    def __init__(self, Hs: List[PlanarHamExpr], row=None, col=None, scalar=1) -> None:
-        super().__init__(row=row, col=col, scalar=scalar)
+    def __init__(self, Hs: List[PlanarHamExpr], scalar=1) -> None:
+        super().__init__()
+        self.scalar = scalar
         self.Hs = Hs
 
     def __str__(self) -> str:
-        if self.scalar == 1:
-            return "\n".join([str(H) for H in self.Hs])
-        else:
-            return str(self.scalar) + " * " + "\n".join([str(H) for H in self.Hs])
+        text = "\n".join([str(H) for H in self.Hs])
+
+        if self.scalar != 1:
+            text = str(self.scalar) + " * " + text
+
+        return text
 
 
 # ==============================================================================
@@ -169,134 +164,25 @@ class Grid:
         self.grid: dict[tuple[int, int], list[PlanarHamExpr]] = {}
         self._gridify()
 
+    # NOTE:
+    # the rows were in 1-index form following the paper
+    # but the columns are not, because col_0 is used as input
     def _gridify(self):
-        for r in range(1, self.rows + 1):
+        for r in range(self.rows):
             for c in range(0, self.cols + 1):
                 self.grid[r, c] = []
 
         def go(H: PlanarHamExpr):
-            if isinstance(H, Identity):
-                self.grid[H.row, H.col].append(H)
-            elif isinstance(H, SingProj):
-                self.grid[H.row, H.col].append(H)
-            elif isinstance(H, HorizProj):
-                self.grid[H.row, H.col].append(H)
-            elif isinstance(H, VertProj):
-                self.grid[H.row, H.col].append(H)
-            elif isinstance(H, HorizSymProject):
-                self.grid[H.row, H.col].append(H)
-            elif isinstance(H, VertSymUnitary):
-                self.grid[H.row, H.col].append(H)
-            elif isinstance(H, Sum):
-                for H2 in H.Hs:
-                    go(H2)
+            if isinstance(H, PlanarHamExpr):
+                if isinstance(H, Sum):
+                    for H2 in H.Hs:
+                        go(H2)
+                else:
+                    self.grid[H.row - 1, H.col].append(H)
             else:
-                raise ValueError("Not supported ...")
+                raise ValueError(f"Unexpected type {type(H)}")
 
         go(self.H)
-
-    def filter(self, f: Callable) -> dict[tuple[int, int], PlanarHamExpr]:
-        grid = {}
-        for r in range(self.rows):
-            for c in range(self.cols + 1):
-                grid[(r, c)] = list(filter(f, self.grid[(r, c)]))
-        return grid
-
-    def zig_zag(self):
-        vert = {}
-        for r in range(self.rows):
-            for c in range(self.cols + 1):
-                vert[(r, c)] = []
-
-        horiz = {}
-        for r in range(self.rows):
-            for c in range(self.cols + 1):
-                horiz[(r, c)] = []
-
-        for c in range(self.cols + 1):  # traverse columns
-            for r in range(self.rows):  # traverse rows
-                for H in self.grid[(r, c)]:
-                    if isinstance(H, Identity):
-                        vert[(r, c)].append(H)
-                    elif isinstance(H, SingProj):
-                        vert[(r, c)].append(H)
-                    elif isinstance(H, VertProj):
-                        vert[(r, c)].append(H)
-                    elif isinstance(H, VertSymUnitary):
-                        vert[(r, c)].append(H)
-                    elif isinstance(H, HorizProj):
-                        horiz[(r, c)].append(H)
-                    elif isinstance(H, HorizSymProject):
-                        horiz[(r, c)].append(H)
-                    else:
-                        raise ValueError(f"{type(H)} not expected ...")
-
-        acc = []
-        for c in range(self.cols + 1):
-            for r in range(self.rows):
-                acc.append((r, c, VERT, vert[(r, c)]))
-            for r in range(self.rows - 1, -1, -1):
-                acc.append((r, c, HORIZ, horiz[(r, c)]))
-        return acc
-
-
-# ==============================================================================
-# Utility
-# ==============================================================================
-
-
-def is_vert(H: PlanarHamExpr, inc_sing=False) -> bool:
-    if isinstance(H, Identity):
-        return inc_sing
-    elif isinstance(H, SingProj):
-        return inc_sing
-    elif isinstance(H, HorizProj):
-        return False
-    elif isinstance(H, VertProj):
-        return True
-    elif isinstance(H, HorizSymProject):
-        return False
-    elif isinstance(H, VertSymUnitary):
-        return True
-    elif isinstance(H, Sum):
-        return False
-    else:
-        raise ValueError(f"{type(H)} not supported ...")
-
-
-def is_horiz(H: PlanarHamExpr, inc_sing=False) -> bool:
-    if isinstance(H, Identity):
-        return inc_sing
-    elif isinstance(H, SingProj):
-        return inc_sing
-    elif isinstance(H, HorizProj):
-        return True
-    elif isinstance(H, VertProj):
-        return False
-    elif isinstance(H, HorizSymProject):
-        return True
-    elif isinstance(H, VertSymUnitary):
-        return False
-    elif isinstance(H, Sum):
-        return False
-    else:
-        raise ValueError(f"{type(H)} not supported ...")
-
-
-# def gridify(rows: int, cols: int, H: PlanarHamExpr) -> dict[tuple[int, int], PlanarHamExpr]:
-#     return Grid(rows, cols, H).grid
-
-
-# def gridify_vert(
-#     R: int, C: int, H: PlanarHamExpr
-# ) -> dict[tuple[int, int], PlanarHamExpr]:
-#     return Grid(R, C, H).filter(lambda x: is_vert(x, inc_sing=False))
-
-
-# def gridify_horiz(
-#     R: int, C: int, H: PlanarHamExpr
-# ) -> dict[tuple[int, int], PlanarHamExpr]:
-#     return Grid(R, C, H).filter(lambda x: is_horiz(x, inc_sing=False))
 
 
 #
@@ -500,7 +386,7 @@ def reify_zigzag(grid: Grid):
 
 
 # ==============================================================================
-# Global Reify (WARNING: CAN ONLY HANDLE SMALL SYSTEMS)
+# Global Reify (similar to compile method in regular clock)
 # ==============================================================================
 
 
@@ -518,10 +404,10 @@ def reify3(n: int, R: int, H: PlanarHamExpr):
 
     for i in range(n):
         for j in range(R + 1):
-            # print("HERE", i, j, len(grid[i, j]))
             for H in grid[i, j]:
                 if isinstance(H, Identity):
                     my_H += H.scalar * sp.eye(size)
+
                 elif isinstance(H, SingProj):
                     D = 2 ** (3)
                     X = sp.lil_matrix((D, D)) * 1j

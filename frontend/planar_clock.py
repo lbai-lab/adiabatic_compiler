@@ -66,8 +66,13 @@ class PlanarClockFrontend(Frontend):
         return Sum(
             [
                 Identity(1, row=1, col=0),
-                SingProj(FIRST0, row=1, col=0, scalar=-1),
-                SingProj(FIRST1, row=1, col=0, scalar=-1),
+                Sum(
+                    [
+                        SingProj(FIRST0, row=1, col=0),
+                        SingProj(FIRST1, row=1, col=0),
+                    ],
+                    scalar=-1,
+                ),
             ]
         )
 
@@ -270,6 +275,6 @@ program = PlanarClockFrontend().unitaries_to_program([sp.csc_matrix(x) for x in 
 
 grid = Grid(program.num_state, program.num_round + 1, program.H_final).grid
 
-for k,v in grid.items():
+for k, v in grid.items():
     if v:
         print(k)
