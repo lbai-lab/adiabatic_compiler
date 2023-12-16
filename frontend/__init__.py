@@ -20,6 +20,7 @@ class ClockAdiabaticProgram:
         self.H_final = H_final
         self.total_time = total_time
         self.time_steps = time_steps
+        self.num_all = num_state + num_clock
 
     def compile(self):
         return compile_expr(self.H_init), compile_expr(self.H_final)
@@ -43,6 +44,7 @@ class PlanarAdiabaticProgram:
         self.H_final = H_final
         self.total_time = total_time
         self.time_steps = time_steps
+        self.num_all = num_state * (num_round + 1) * 3
 
     def compile(self):
         return (

@@ -1,6 +1,5 @@
 import scipy.sparse as sp
-from typing import *
-
+from itertools import product
 
 # ==============================================================================
 # 6-state Particles
@@ -38,6 +37,7 @@ class PlanarHamExpr:
         assert isinstance(col, int) or col is None
         self.row = row
         self.col = col
+        self.scalar = 1
 
 
 class Identity(PlanarHamExpr):
@@ -84,7 +84,7 @@ class VertProj(PlanarHamExpr):
         return f"VP({self.state1}, {self.state2})_({self.row}, {self.col})"
 
 
-class HorizProj(PlanarHamExpr):
+class HoriProj(PlanarHamExpr):
     """Horizontal 2-local Hamiltonian.
 
     |p_1 p_2> <p_1 p_2|
@@ -99,24 +99,24 @@ class HorizProj(PlanarHamExpr):
         return f"HP({self.state1}, {self.state2})_({self.row}, {self.col})"
 
 
-class HorizSymProject(PlanarHamExpr):
+class HoriSymProject(PlanarHamExpr):
     """Horizontal 2-local Hamiltonian.
 
     |p_1 p_2><p_3 p_4| + |p_3 p_4><p_1 p_2|
     """
 
     def __init__(
-        self, states1: List[str], states2: List[str], row: int, col: int
+        self, states1: tuple[str, str], states2: tuple[str, str], row: int, col: int
     ) -> None:
         super().__init__(row, col)
         self.states1 = states1
         self.states2 = states2
 
     def __str__(self):
-        return f"SP({self.orient}, {self.states1}, {self.states2})_({self.row}, {self.col})"
+        return f"SP({self.states1}, {self.states2})_({self.row}, {self.col})"
 
 
-class VertSymUnitary(PlanarHamExpr):
+class SymUnitary(PlanarHamExpr):
     """Vertical 2-local Hamiltonian that symmetrizes unitary.
 
     0           U
@@ -124,6 +124,9 @@ class VertSymUnitary(PlanarHamExpr):
     """
 
     def __init__(self, U: sp.spmatrix, row: int, col: int) -> None:
+        assert (U.shape[0] == 2 and row == 1) or (
+            U.shape[0] == 4 and row > 1
+        ), f"Wrong unitary location, recieved U shape = {U.shape}, row = {row}"
         super().__init__(row, col)
         self.U = U
 
@@ -131,13 +134,13 @@ class VertSymUnitary(PlanarHamExpr):
         return f"U_{self.row, self.col}"
 
 
-class Sum(PlanarHamExpr):
+class ScalarSum(PlanarHamExpr):
     """Sum of 2-local Hamiltonians."""
 
-    def __init__(self, Hs: List[PlanarHamExpr], scalar=1) -> None:
+    def __init__(self, Hs: list[PlanarHamExpr], scalar=1) -> None:
         super().__init__()
-        self.scalar = scalar
         self.Hs = Hs
+        self.scalar = scalar
 
     def __str__(self) -> str:
         text = "\n".join([str(H) for H in self.Hs])
@@ -151,9 +154,6 @@ class Sum(PlanarHamExpr):
 # ==============================================================================
 # Grid
 # ==============================================================================
-
-HORIZ = "HORIZ"
-VERT = "VERT"
 
 
 class Grid:
@@ -172,25 +172,19 @@ class Grid:
             for c in range(0, self.cols + 1):
                 self.grid[r, c] = []
 
-        def go(H: PlanarHamExpr):
+        def go(H: PlanarHamExpr, scalar=1):
             if isinstance(H, PlanarHamExpr):
-                if isinstance(H, Sum):
+                H.scalar *= scalar
+                if isinstance(H, ScalarSum):
                     for H2 in H.Hs:
-                        go(H2)
+                        go(H2, H.scalar)
                 else:
                     self.grid[H.row - 1, H.col].append(H)
             else:
                 raise ValueError(f"Unexpected type {type(H)}")
 
-        go(self.H)
+        go(self.H, 1)
 
-
-#
-#  FROM refiy.py
-#
-import numpy as np
-import scipy.sparse as sp
-from typing import *
 
 """
 
@@ -213,16 +207,6 @@ q_4        q_10
 # ==============================================================================
 # Utility
 # ==============================================================================
-
-
-def bin_strs(n: int) -> list[str]:
-    from itertools import product
-
-    return ["".join(p) for p in product("01", repeat=n)]
-
-
-def flatten3(n: int, R: int, i: int, j: int, q: int) -> int:
-    return q + 3 * i + j * 3 * n
 
 
 def encode3(st: str) -> str:
@@ -256,384 +240,135 @@ def encode3(st: str) -> str:
         raise ValueError(f"{st} not supported ...")
 
 
-_START = encode3(START)
-_FIRST0 = encode3(FIRST0)
-_FIRST1 = encode3(FIRST1)
-_SECOND0 = encode3(SECOND0)
-_SECOND1 = encode3(SECOND1)
-_END = encode3(END)
-_ILLEGAL0 = "110"
-_ILLEGAL1 = "111"
+_F0 = encode3(FIRST0)
+_F1 = encode3(FIRST1)
+_S0 = encode3(SECOND0)
+_S1 = encode3(SECOND1)
 
 
-def to_vec(s):
-    def f(c):
-        if c == "0":
-            return np.array([1.0, 0.0])
-        else:
-            return np.array([0.0, 1.0])
-
-    if len(s) == 1:
-        return f(s)
-    else:
-        return np.kron(f(s[0]), to_vec(s[1:]))
+def get_particle(n: int, i: int, j: int):
+    q_0 = 3 * i + j * 3 * n
+    return q_0, q_0 + 1, q_0 + 2
 
 
-# ==============================================================================
-# Reify
-# ==============================================================================
+def bin_strs(n: int) -> list[str]:
+    return ["".join(p) for p in product("01", repeat=n)]
 
 
-def penalize_11(X):
-    illegal = [_ILLEGAL0, _ILLEGAL1]
-    for n in bin_strs(3):
-        for s in illegal:
-            idx = int(s + n, 2)
-            X[idx, idx] += 1.0
-            idx = int(n + s, 2)
-            X[idx, idx] += 1.0
+def kron_I(mat: sp.spmatrix, front: int, back: int):
+    assert front >= 0 and back >= 0, "Unexpected negative identity numbers"
+    return sp.kron(sp.eye(2**front), sp.kron(mat, sp.eye(2**back)))
 
 
-def reify_2local(H: PlanarHamExpr):
-    if isinstance(H, Identity):
-        return H.scalar * np.eye(64) * 1j
-    elif isinstance(H, Sum):
-        return sum(reify_2local(x) for x in H.Hs)
-    elif isinstance(H, SingProj):
-        X = sp.lil_matrix((8, 8)) * 1j
-        s = encode3(H.state)
-        idx = int(s, 2)
-        X[idx, idx] = 1.0
-        Y = sp.kron(sp.eye(8), X)  # |bot top>
-        return H.scalar * Y
-    elif isinstance(H, VertProj):
-        X = sp.lil_matrix((64, 64)) * 1j
-        s1 = encode3(H.state1)
-        s2 = encode3(H.state2)
-        idx = int(s2 + s1, 2)  # |bot top>
-        X[idx, idx] = 1.0
-        return H.scalar * X
-    elif isinstance(H, VertSymUnitary):
-        U = H.U
-        if U.shape[0] == 2:
-            X = sp.lil_matrix((8, 8)) * 1j
-            X[int(_FIRST0, 2), int(_SECOND0, 2)] = U[0, 0]
-            X[int(_FIRST0, 2), int(_SECOND1, 2)] = U[0, 1]
-            X[int(_FIRST1, 2), int(_SECOND0, 2)] = U[1, 0]
-            X[int(_FIRST1, 2), int(_SECOND1, 2)] = U[1, 1]
-            X += X.conj().transpose()
-            X = -X
-            # |bot top>
-            return H.scalar * sp.kron(sp.eye(8), X)
-        elif U.shape[0] == 4:
-            X = sp.lil_matrix((64, 64)) * 1j
-            # |bot top>
-            # 00 -> [00, 01, 10, 11]
-            X[int("010100", 2), int("100100", 2)] = U[0, 0]
-            X[int("010100", 2), int("100101", 2)] = U[0, 1]
-            X[int("010100", 2), int("101100", 2)] = U[0, 2]
-            X[int("010100", 2), int("101101", 2)] = U[0, 3]
-            # 01 -> [00, 01, 10, 11]
-            X[int("010101", 2), int("100100", 2)] = U[1, 0]
-            X[int("010101", 2), int("100101", 2)] = U[1, 1]
-            X[int("010101", 2), int("101100", 2)] = U[1, 2]
-            X[int("010101", 2), int("101101", 2)] = U[1, 3]
-            # 10 -> [00, 01, 10, 11]
-            X[int("011100", 2), int("100100", 2)] = U[2, 0]
-            X[int("011100", 2), int("100101", 2)] = U[2, 1]
-            X[int("011100", 2), int("101100", 2)] = U[2, 2]
-            X[int("011100", 2), int("101101", 2)] = U[2, 3]
-            # 11 -> [00, 01, 10, 11]
-            X[int("011101", 2), int("100100", 2)] = U[3, 0]
-            X[int("011101", 2), int("100101", 2)] = U[3, 1]
-            X[int("011101", 2), int("101100", 2)] = U[3, 2]
-            X[int("011101", 2), int("101101", 2)] = U[3, 3]
-            X += X.conj().transpose()
-            X = -X
-            return H.scalar * X
-        else:
-            raise ValueError(f"Shape {U.shape} not expected ...")
-    elif isinstance(H, HorizProj):
-        X = sp.lil_matrix((64, 64)) * 1j
-        s1 = encode3(H.state1)
-        s2 = encode3(H.state2)
-        idx = int(s2 + s1, 2)  # |right left>
-        X[idx, idx] = 1.0
-        return H.scalar * X
-    elif isinstance(H, HorizSymProject):
-        X = sp.lil_matrix((64, 64)) * 1j
-        s1_1 = encode3(H.states1[0])
-        s1_2 = encode3(H.states1[1])
-        s2_1 = encode3(H.states2[0])
-        s2_2 = encode3(H.states2[1])
-        idx1 = int(s1_2 + s1_1, 2)  # |right left>
-        idx2 = int(s2_2 + s2_1, 2)  # |right left>
-        X[idx1, idx2] = 1.0
-        X[idx2, idx1] = 1.0
-        return H.scalar * X
-    else:
-        raise ValueError(f"{type(H)} not expected ...")
+def init_square_matrix(size: int) -> sp.csc_matrix:
+    return sp.csc_matrix((size, size)) * 1j
 
 
-def reify_zigzag(grid: Grid):
-    acc = []
-    for r, c, orient, Hs in grid.zig_zag():
-        my_H = np.zeros((64, 64))
-        for H in Hs:
-            my_H += reify_2local(H)
-        acc.append((r, c, orient, my_H))
-    return acc
-
-
-# ==============================================================================
-# Global Reify (similar to compile method in regular clock)
-# ==============================================================================
-
-
+# the entry of compile
+# different from compile_expr in regular clock
 def reify3(n: int, R: int, H: PlanarHamExpr):
-    grid = Grid(n, R, H).grid
-    num_qubits = 3 * n * (R + 1)
+    num_particles = n * (R + 1)
+    num_qubits = 3 * num_particles
     size = 2**num_qubits
-    my_H = sp.lil_matrix((size, size))
+    my_H = init_square_matrix(size)
 
-    def splat(i, j):
-        q0 = flatten3(n, R, i, j, 0)
-        q1 = flatten3(n, R, i, j, 1)
-        q2 = flatten3(n, R, i, j, 2)
-        return [q0, q1, q2]
+    for pos, Hs in Grid(n, R, H).grid.items():
+        if len(Hs) == 0:
+            continue
 
-    for i in range(n):
-        for j in range(R + 1):
-            for H in grid[i, j]:
-                if isinstance(H, Identity):
-                    my_H += H.scalar * sp.eye(size)
+        k, r = pos
+        qs_k_r = get_particle(n, k, r)
+        start_idx = qs_k_r[0]
+        hori_all_qubits = 3 * (n + 1)
+        size_hori_all = 2**hori_all_qubits
+        hori_middle_qubits = 3 * (n - 1)
 
-                elif isinstance(H, SingProj):
-                    D = 2 ** (3)
-                    X = sp.lil_matrix((D, D)) * 1j
-                    s, qs = encode3(H.state), splat(i, j)
-                    idx = int(s, 2)
+        for H in Hs:
+            # TODO: check what Identity.n can do so far
+            # but probably just leave it alone
+            if isinstance(H, Identity):
+                my_H += H.scalar * sp.eye(size)
+
+            elif isinstance(H, SingProj):
+                X = init_square_matrix(8)
+                idx = int(encode3(H.state), 2)
+                X[idx, idx] = 1.0
+
+                my_H += H.scalar * kron_I(X, start_idx, num_qubits - start_idx - 3)
+
+            elif isinstance(H, VertProj):
+                X = init_square_matrix(64)
+                idx = int(encode3(H.state1) + encode3(H.state2), 2)
+                X[idx, idx] = 1.0
+
+                my_H += H.scalar * kron_I(X, start_idx, num_qubits - start_idx - 6)
+
+            elif isinstance(H, HoriProj):
+                X = init_square_matrix(size_hori_all)
+
+                s1, s2 = encode3(H.state1), encode3(H.state2)
+                for middle in bin_strs(hori_middle_qubits):
+                    idx = int(s1 + middle + s2, 2)
                     X[idx, idx] = 1.0
-                    my_H += H.scalar * sp.kron(
-                        sp.eye(2 ** (num_qubits - qs[-1] - 1)),
-                        sp.kron(X, sp.eye(2 ** qs[0])),
-                    )
-                elif isinstance(H, VertProj):
-                    D = 2 ** (3 * 2)
-                    X = sp.lil_matrix((D, D)) * 1j
-                    s1, qs1 = encode3(H.state1), splat(i, j)
-                    s2, qs2 = encode3(H.state2), splat(i + 1, j)
-                    idx = int(s1 + s2, 2)
-                    X[idx, idx] = 1.0
-                    my_H += H.scalar * sp.kron(
-                        sp.eye(2 ** (num_qubits - qs2[-1] - 1)),
-                        sp.kron(X, sp.eye(2 ** qs1[0])),
-                    )
-                elif isinstance(H, HorizProj):
-                    s1, qs1 = encode3(H.state1), splat(i, j)
-                    s2, qs2 = encode3(H.state2), splat(i, j + 1)
-                    D = 2 ** (qs2[-1] - qs1[0] + 1)
-                    X = sp.lil_matrix((D, D)) * 1j
-                    for middle in bin_strs(qs2[0] - qs1[-1] - 1):
-                        idx = int(s1 + middle + s2, 2)
-                        X[idx, idx] = 1.0
-                    # print(i, j)
-                    my_H += H.scalar * sp.kron(
-                        sp.eye(2 ** (num_qubits - qs2[-1] - 1)),
-                        sp.kron(X, sp.eye(2 ** qs1[0])),
-                    )
-                elif isinstance(H, HorizSymProject):
-                    # print("SYMPROJECT", i, j)
 
-                    qs = []
-                    for k in range(len(H.states1)):
-                        q0 = flatten3(n, R, i, j + k, 0)
-                        q1 = flatten3(n, R, i, j + k, 1)
-                        q2 = flatten3(n, R, i, j + k, 2)
-                        qs.append(q0, q1, q2)
-                    D = 2 ** (qs[-1] - qs[0] + 1)
-                    X = sp.lil_matrix((D, D)) * 1j
-                    s1_1 = encode3(H.states1[0])
-                    s1_2 = encode3(H.states1[1])
-                    s2_1 = encode3(H.states2[0])
-                    s2_2 = encode3(H.states2[1])
-                    for middle in bin_strs(qs[3] - qs[2] - 1):
-                        idx1 = int(s1_1 + middle + s1_2, 2)
-                        idx2 = int(s2_1 + middle + s2_2, 2)
-                        X[idx1, idx2] = 1.0
-                    my_H += H.scalar * sp.kron(
-                        sp.eye(2 ** (num_qubits - qs[-1] - 1)),
-                        sp.kron(X, sp.eye(2 ** qs[0])),
-                    )
-                    # print("HORIZONTAL", H.row, H.col, len(H.states1), qs)
-                elif isinstance(H, VertSymUnitary):
-                    # print("SYMUNITARY", i, j)
-                    D = 2 ** (3 * 2)
-                    U = H.U
-                    if U.shape[0] == 2:
-                        X = sp.lil_matrix((8, 8)) * 1j
-                        X[int("010", 2), int("100", 2)] = U[0, 0]
-                        X[int("010", 2), int("101", 2)] = U[0, 1]
-                        X[int("011", 2), int("100", 2)] = U[1, 0]
-                        X[int("011", 2), int("101", 2)] = U[1, 1]
-                        X += X.conj().transpose()
-                        X = -X
-                        # print("TEST X", np.allclose(X.todense(), X.conj().transpose().todense()))
-                        qs = splat(i, j)
-                        # Y = H.scalar * sp.kron(sp.eye(2 ** (num_qubits - qs[-1] - 1)), sp.kron(X, sp.eye(2 ** qs[0])))
-                        # print("TEST Y", np.allclose(Y.todense(), Y.conj().transpose().todense()))
-                        my_H += H.scalar * sp.kron(
-                            sp.eye(2 ** (num_qubits - qs[-1] - 1)),
-                            sp.kron(X, sp.eye(2 ** qs[0])),
-                        )
-                    elif U.shape[0] == 4:
-                        # print("HERE", U)
-                        X = sp.lil_matrix((64, 64)) * 1j
-                        # |bot top>
-                        # 00 -> [00, 01, 10, 11]
-                        X[int("010100", 2), int("100100", 2)] = U[0, 0]
-                        X[int("010100", 2), int("100101", 2)] = U[0, 1]
-                        X[int("010100", 2), int("101100", 2)] = U[0, 2]
-                        X[int("010100", 2), int("101101", 2)] = U[0, 3]
-                        # 01 -> [00, 01, 10, 11]
-                        X[int("010101", 2), int("100100", 2)] = U[1, 0]
-                        X[int("010101", 2), int("100101", 2)] = U[1, 1]
-                        X[int("010101", 2), int("101100", 2)] = U[1, 2]
-                        X[int("010101", 2), int("101101", 2)] = U[1, 3]
-                        # 10 -> [00, 01, 10, 11]
-                        X[int("011100", 2), int("100100", 2)] = U[2, 0]
-                        X[int("011100", 2), int("100101", 2)] = U[2, 1]
-                        X[int("011100", 2), int("101100", 2)] = U[2, 2]
-                        X[int("011100", 2), int("101101", 2)] = U[2, 3]
-                        # 11 -> [00, 01, 10, 11]
-                        X[int("011101", 2), int("100100", 2)] = U[3, 0]
-                        X[int("011101", 2), int("100101", 2)] = U[3, 1]
-                        X[int("011101", 2), int("101100", 2)] = U[3, 2]
-                        X[int("011101", 2), int("101101", 2)] = U[3, 3]
-                        X += X.conj().transpose()
-                        X = -X
-                        # print("TEST X 2", np.allclose(X.todense(), X.conj().transpose().todense()))
-                        qs1, qs2 = splat(i, j), splat(i + 1, j)
-                        my_H += H.scalar * sp.kron(
-                            sp.eye(2 ** (num_qubits - qs2[-1] - 1)),
-                            sp.kron(X, sp.eye(2 ** qs1[0])),
-                        )
-                    else:
-                        raise ValueError(
-                            "Unexpected shape (should be 2x2 or 4x4)", U.shape
-                        )
+                my_H += H.scalar * kron_I(
+                    X, start_idx, num_qubits - start_idx - hori_all_qubits
+                )
+
+            elif isinstance(H, HoriSymProject):
+                X = init_square_matrix(size_hori_all)
+                s1_1, s1_2 = encode3(H.states1[0]), encode3(H.states1[1])
+                s2_1, s2_2 = encode3(H.states2[0]), encode3(H.states2[1])
+
+                for middle in bin_strs(hori_middle_qubits):
+                    idx1 = int(s1_1 + middle + s1_2, 2)
+                    idx2 = int(s2_1 + middle + s2_2, 2)
+                    X[idx1, idx2] = 1.0
+                    X[idx2, idx1] = 1.0
+
+                my_H += H.scalar * kron_I(
+                    X, start_idx, num_qubits - start_idx - hori_all_qubits
+                )
+
+            elif isinstance(H, SymUnitary):
+                U = -H.U
+                if U.shape[0] == 2:
+                    X = init_square_matrix(8)
+                    X[int(_F0, 2), int(_S0, 2)] = U[0, 0]
+                    X[int(_F0, 2), int(_S1, 2)] = U[0, 1]
+                    X[int(_F1, 2), int(_S0, 2)] = U[1, 0]
+                    X[int(_F1, 2), int(_S1, 2)] = U[1, 1]
+                    X += X.conj().transpose()
+                    my_H += H.scalar * kron_I(X, start_idx, num_qubits - start_idx - 3)
+                elif U.shape[0] == 4:
+                    X = init_square_matrix(64)
+                    # |bot top>
+                    # 00 -> [00, 01, 10, 11]
+                    X[int(_F0 + _F0, 2), int(_S0 + _S0, 2)] = U[0, 0]
+                    X[int(_F0 + _F0, 2), int(_S0 + _S1, 2)] = U[0, 1]
+                    X[int(_F0 + _F0, 2), int(_S1 + _S0, 2)] = U[0, 2]
+                    X[int(_F0 + _F0, 2), int(_S1 + _S1, 2)] = U[0, 3]
+                    # 01 -> [00, 01, 10, 11]
+                    X[int(_F0 + _F1, 2), int(_S0 + _S0, 2)] = U[1, 0]
+                    X[int(_F0 + _F1, 2), int(_S0 + _S1, 2)] = U[1, 1]
+                    X[int(_F0 + _F1, 2), int(_S1 + _S0, 2)] = U[1, 2]
+                    X[int(_F0 + _F1, 2), int(_S1 + _S1, 2)] = U[1, 3]
+                    # 10 -> [00, 01, 10, 11]
+                    X[int(_F1 + _F0, 2), int(_S0 + _S0, 2)] = U[2, 0]
+                    X[int(_F1 + _F0, 2), int(_S0 + _S1, 2)] = U[2, 1]
+                    X[int(_F1 + _F0, 2), int(_S1 + _S0, 2)] = U[2, 2]
+                    X[int(_F1 + _F0, 2), int(_S1 + _S1, 2)] = U[2, 3]
+                    # 11 -> [00, 01, 10, 11]
+                    X[int(_F1 + _F1, 2), int(_S0 + _S0, 2)] = U[3, 0]
+                    X[int(_F1 + _F1, 2), int(_S0 + _S1, 2)] = U[3, 1]
+                    X[int(_F1 + _F1, 2), int(_S1 + _S0, 2)] = U[3, 2]
+                    X[int(_F1 + _F1, 2), int(_S1 + _S1, 2)] = U[3, 3]
+                    X += X.conj().transpose()
+                    my_H += H.scalar * kron_I(X, start_idx, num_qubits - start_idx - 6)
+
                 else:
-                    raise ValueError(f"{type(H)} not implemented")
+                    raise ValueError("Unexpected shape (should be 2x2 or 4x4)", U.shape)
+            else:
+                raise ValueError(f"{type(H)} not implemented")
+
     return my_H
-
-
-# ==============================================================================
-# Test
-# ==============================================================================
-
-
-def mk_oneq_H(U):
-    X = np.zeros((8, 8)) * 1j
-    X[int(_FIRST0, 2), int(_SECOND0, 2)] = U[0, 0]
-    X[int(_FIRST0, 2), int(_SECOND1, 2)] = U[0, 1]
-    X[int(_FIRST1, 2), int(_SECOND0, 2)] = U[1, 0]
-    X[int(_FIRST1, 2), int(_SECOND1, 2)] = U[1, 1]
-    X += X.conj().transpose()
-    X = -X
-
-    # Penalize 11 prefix
-    illegal = [_ILLEGAL0, _ILLEGAL1]
-    for s in illegal:
-        idx = int(s, 2)
-        X[idx, idx] += 1.0
-
-    # Penalize non-input
-    for i in range(8):
-        X[i, i] += 1.0
-    X[int("010", 2), int("010", 2)] -= 1
-    return X
-
-
-def mk_twoq_H(U):
-    X = np.array(reify_2local(VertSymUnitary(U, 0, 0)).todense())
-
-    # Penalize 11 prefix
-    penalize_11(X)
-
-    # Penalize non-input
-    for i in range(64):
-        X[i, i] += 1.0
-    # X[int("010010", 2), int("010010", 2)] -= 1
-    # second phase 0 on top of first phase 0
-    X[int("010100", 2), int("010100", 2)] -= 1
-
-    # Penalize first above second
-    for x in [_FIRST0, _FIRST1]:
-        for y in [_SECOND0, _SECOND1]:
-            X[int(x + y, 2), int(x + y, 2)] += 1
-    return X
-
-
-def test_oneq(U):
-    X = mk_oneq_H(U)
-
-    eigvals, eigvecs = np.linalg.eigh(X)
-    print(eigvals)
-    for i in range(1):  # for i in range(8):
-        x = np.abs(eigvecs[:, i])
-        args = np.argsort(x)
-        acc = []
-        for j in range(1, 5):
-            s = format(args[-j], "03b")
-            acc.append((s, x[args[-j]]))
-        print(acc)
-
-
-def test_twoq(U):
-    X = mk_twoq_H(U)
-
-    eigvals, eigvecs = np.linalg.eigh(X)
-    print(eigvals[0:64])
-    for i in range(5):  # for i in range(8):
-        x = np.abs(eigvecs[:, i])
-        args = np.argsort(x)
-        acc = []
-        for j in range(1, 4):
-            s = format(args[-j], "06b")
-            acc.append((s, x[args[-j]]))
-        print(acc)
-
-
-def test():
-    H = (
-        1
-        / np.sqrt(2)
-        * np.array(
-            [
-                [1, 1],
-                [1, -1],
-            ]
-        )
-    )
-    print("H")
-    test_oneq(H)
-
-    theta = np.pi
-    X = np.array(
-        [
-            [np.cos(theta / 2), np.sin(theta / 2) * -1j],
-            [np.sin(theta / 2) * -1j, np.cos(theta / 2)],
-        ]
-    )
-    print("X")
-    test_oneq(X)
-
-    print("X I")  # 2 particles
-    test_twoq(np.kron(X, np.eye(2)))
-
-    print("X H")  # 2 particles
-    test_twoq(np.kron(X, H))
-
-
-if __name__ == "__main__":
-    test()

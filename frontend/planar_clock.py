@@ -1,6 +1,5 @@
 import numpy as np
 import scipy.sparse as sp
-from typing import *
 
 from frontend import Frontend, PlanarAdiabaticProgram
 from planar_hamiltonian_lang import *
@@ -44,7 +43,7 @@ class PlanarClockFrontend(Frontend):
         Returns:
             PlanarHamExpr: Hamiltonian.
         """
-        return Sum([SingProj(FIRST1, row=k, col=0) for k in range(1, n + 1)])
+        return ScalarSum([SingProj(FIRST1, row=k, col=0) for k in range(1, n + 1)])
 
     def _gen_H_clockinit(self, n: int, R: int, L: int) -> PlanarHamExpr:
         """Check that clock is initialized correctly.
@@ -63,10 +62,10 @@ class PlanarClockFrontend(Frontend):
         Returns:
             PlanarHamExpr: Hamiltonian.
         """
-        return Sum(
+        return ScalarSum(
             [
                 Identity(1, row=1, col=0),
-                Sum(
+                ScalarSum(
                     [
                         SingProj(FIRST0, row=1, col=0),
                         SingProj(FIRST1, row=1, col=0),
@@ -101,20 +100,20 @@ class PlanarClockFrontend(Frontend):
                 # RULE 1
                 # START can't be at the left side of not-START
                 for x in not_start:
-                    rules.append(HorizProj(START, x, row=k, col=r))
+                    rules.append(HoriProj(START, x, row=k, col=r))
                 # RULE 2
                 # END can't be at the right side of not-END
                 for x in not_end:
-                    rules.append(HorizProj(x, END, row=k, col=r))
+                    rules.append(HoriProj(x, END, row=k, col=r))
                 # RULE 3
                 # START and END can't be adjacent
-                rules.append(HorizProj(START, END, row=k, col=r))
-                rules.append(HorizProj(END, START, row=k, col=r))
+                rules.append(HoriProj(START, END, row=k, col=r))
+                rules.append(HoriProj(END, START, row=k, col=r))
                 # RULE 4
                 # FIRST and SECOND can't be adjacent
                 for x in span_both:
                     for y in span_both:
-                        rules.append(HorizProj(x, y, row=k, col=r))
+                        rules.append(HoriProj(x, y, row=k, col=r))
 
         # Vertical Rules
         not_second = SPAN_FIRST + [START, END]
@@ -143,9 +142,11 @@ class PlanarClockFrontend(Frontend):
                 for x in SPAN_FIRST:
                     rules.append(VertProj(END, x, row=k, col=r))
 
-        return Sum(rules, scalar=L**6)
+        return ScalarSum(rules, scalar=L**6)
 
-    def _gen_H_l_sum(self, n: int, R: int, L: int, Us: List) -> PlanarHamExpr:
+    def _gen_H_l_sum(
+        self, n: int, R: int, L: int, Us: list[sp.spmatrix]
+    ) -> PlanarHamExpr:
         """Check that clock propagation is correct.
 
         Args:
@@ -160,13 +161,14 @@ class PlanarClockFrontend(Frontend):
         # TODO check how unitary is appended, in 2x2/4x4 or 2^nx2^n form?
         arr_pos = []
         arr_neg = []
+        Us = [None] + Us  # turn it into 1-index as paper
 
         for r in range(R):  # one less column (every neighbors are propogated)
             for k in range(1, n + 1):  # all rows
                 # Downward Phase
                 # check gates are propogated correctly
                 down_l = 2 * n * r + k
-                arr_neg.append(VertSymUnitary(Us[down_l], row=k, col=r))
+                arr_pos.append(SymUnitary(Us[down_l], row=k, col=r))
 
                 if k == 1:
                     for x in SPAN_FIRST:
@@ -204,7 +206,7 @@ class PlanarClockFrontend(Frontend):
                     for x in SPAN_SECOND:
                         arr_pos.append(VertProj(x, END, row=1, col=r))
                     for x in SPAN_FIRST:
-                        arr_pos.append(SingProj(FIRST1, row=1, col=r + 1))
+                        arr_pos.append(SingProj(x, row=1, col=r + 1))
 
                 else:
                     raise NotImplementedError(
@@ -215,10 +217,12 @@ class PlanarClockFrontend(Frontend):
                     for x in SPAN_FIRST:
                         arr_pos.append(VertProj(START, x, row=i, col=r + 1))
 
-                for x, y in zip(SPAN_SECOND, SPAN_FIRST):
-                    arr_neg.append(HorizSymProject([x, START], [END, y], row=i, col=r))
+                arr_neg.append(HoriSymProject([SECOND0, START], [END, FIRST0], row=i, col=r))
+                arr_neg.append(HoriSymProject([SECOND1, START], [END, FIRST1], row=i, col=r))
 
-        return Sum([Sum(arr_pos), Sum(arr_neg, scalar=-1)], scalar=0.5)
+        return ScalarSum(
+            [ScalarSum(arr_pos), ScalarSum(arr_neg, scalar=-1)], scalar=0.5
+        )
 
     def unitaries_to_program(self, Us: list[sp.spmatrix]):
         """Translate a list of unitaries into an adiabatic program.
@@ -249,32 +253,8 @@ class PlanarClockFrontend(Frontend):
             n,
             R,
             L,
-            Sum([H_clockinit, H_input, H_clock]),
-            # Sum([H_l_sum, H_input, H_clock]),
-            H_l_sum,
+            ScalarSum([H_clockinit, H_input, H_clock]),
+            ScalarSum([H_l_sum, H_input, H_clock]),
             L**10,
             L + 1,
         )
-
-
-# currently use an example circuit of the bell state
-from qiskit import QuantumCircuit
-from qiskit.quantum_info import Operator
-
-gates = []
-qc = QuantumCircuit(1)
-qc.h(0)
-gates.append(Operator(qc))
-qc = QuantumCircuit(2)
-qc.cx(0, 1)
-gates.append(Operator(qc))
-gates.append(Operator(QuantumCircuit(1)))
-gates.append(Operator(QuantumCircuit(1)))
-
-program = PlanarClockFrontend().unitaries_to_program([sp.csc_matrix(x) for x in gates])
-
-grid = Grid(program.num_state, program.num_round + 1, program.H_final).grid
-
-for k, v in grid.items():
-    if v:
-        print(k)

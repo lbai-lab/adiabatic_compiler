@@ -18,12 +18,8 @@ class CPUBackend(Backend):
             (-1j * duration * ((1 - s) * H_init + s * H_final))
         )
 
-        if isinstance(adiabatic_program, PlanarAdiabaticProgram):
-            raise NotImplementedError()
-        else:
-            num_all = adiabatic_program.num_state + adiabatic_program.num_clock
-        qc = QuantumCircuit(num_all)
-        q_range = list(range(num_all))
+        qc = QuantumCircuit(adiabatic_program.num_all)
+        q_range = list(range(qc.num_qubits))
         # Hamiltonian Gate is not used because it is slower
         for j in tqdm(range(adiabatic_program.time_steps + 1)):
             qc.unitary(H_of_s(j / adiabatic_program.time_steps).toarray(), q_range)
