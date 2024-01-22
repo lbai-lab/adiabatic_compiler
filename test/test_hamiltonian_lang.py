@@ -1,5 +1,4 @@
-from test import *
-from test.test_clock_frontend import TestClockFrontend
+from test.test_clock_frontend import *
 
 
 class TestHamiltonianLanguage(unittest.TestCase):

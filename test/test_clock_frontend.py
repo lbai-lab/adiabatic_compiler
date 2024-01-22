@@ -1,6 +1,14 @@
 from test import *
 
 from frontend.clock import ClockFrontend
+from hamiltonian_lang import *
+
+n = 4
+exp2_n = 2**n
+
+L = 4
+exp2_L = 2**n
+
 
 # NOTE: this is pretty much my very 1st raw implementation
 
