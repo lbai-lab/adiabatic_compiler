@@ -1,22 +1,19 @@
-Welcome to Lumache's documentation!
+Compile to Adiabatic Documentation
 ===================================
 
-**Lumache** (/lu'make/) is a Python library for cooks and food lovers
-that creates recipes mixing random ingredients.
-It pulls data from the `Open Food Facts database <https://world.openfoodfacts.org/>`_
-and offers a *simple* and *intuitive* API.
+This is documentation for the package `library <https://github.com/lbai-lab/compile_to_adiabatic>`_.
 
-Check out the :doc:`usage` section for further information, including
-how to :ref:`installation` the project.
-
-.. note::
-
-   This project is under active development.
-
-Contents
---------
 
 .. toctree::
+   :maxdepth: 1
+   :caption: Quick Start
 
-   usage
-   api
+   quick_start/Quick_Start.ipynb
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Frontend Reference
+
+   frontend.clock
+   frontend.planer_clock
+   frontend.compress
