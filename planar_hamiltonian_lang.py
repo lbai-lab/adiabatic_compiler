@@ -240,10 +240,14 @@ def encode3(st: str) -> str:
         raise ValueError(f"{st} not supported ...")
 
 
-_F0 = encode3(FIRST0)
-_F1 = encode3(FIRST1)
-_S0 = encode3(SECOND0)
-_S1 = encode3(SECOND1)
+_SPAN_1_FIRST = [int(encode3(x), 2) for x in SPAN_FIRST]
+_SPAN_1_SECOND = [int(encode3(x), 2) for x in SPAN_SECOND]
+_SPAN_2_FIRST = [
+    int(encode3(x) + encode3(y), 2) for x in SPAN_FIRST for y in SPAN_FIRST
+]
+_SPAN_2_SECOND = [
+    int(encode3(x) + encode3(y), 2) for x in SPAN_SECOND for y in SPAN_SECOND
+]
 
 
 def get_particle(n: int, i: int, j: int):
@@ -334,35 +338,16 @@ def reify3(n: int, R: int, H: PlanarHamExpr):
                 U = -H.U
                 if U.shape[0] == 2:
                     X = init_square_matrix(8)
-                    X[int(_F0, 2), int(_S0, 2)] = U[0, 0]
-                    X[int(_F0, 2), int(_S1, 2)] = U[0, 1]
-                    X[int(_F1, 2), int(_S0, 2)] = U[1, 0]
-                    X[int(_F1, 2), int(_S1, 2)] = U[1, 1]
+                    for i1, i2 in enumerate(_SPAN_1_FIRST):
+                        for j1, j2 in enumerate(_SPAN_1_SECOND):
+                            X[i2, j2] = U[i1, j1]
                     X += X.conj().transpose()
                     my_H += H.scalar * kron_I(X, start_idx, num_qubits - start_idx - 3)
                 elif U.shape[0] == 4:
                     X = init_square_matrix(64)
-                    # |bot top>
-                    # 00 -> [00, 01, 10, 11]
-                    X[int(_F0 + _F0, 2), int(_S0 + _S0, 2)] = U[0, 0]
-                    X[int(_F0 + _F0, 2), int(_S0 + _S1, 2)] = U[0, 1]
-                    X[int(_F0 + _F0, 2), int(_S1 + _S0, 2)] = U[0, 2]
-                    X[int(_F0 + _F0, 2), int(_S1 + _S1, 2)] = U[0, 3]
-                    # 01 -> [00, 01, 10, 11]
-                    X[int(_F0 + _F1, 2), int(_S0 + _S0, 2)] = U[1, 0]
-                    X[int(_F0 + _F1, 2), int(_S0 + _S1, 2)] = U[1, 1]
-                    X[int(_F0 + _F1, 2), int(_S1 + _S0, 2)] = U[1, 2]
-                    X[int(_F0 + _F1, 2), int(_S1 + _S1, 2)] = U[1, 3]
-                    # 10 -> [00, 01, 10, 11]
-                    X[int(_F1 + _F0, 2), int(_S0 + _S0, 2)] = U[2, 0]
-                    X[int(_F1 + _F0, 2), int(_S0 + _S1, 2)] = U[2, 1]
-                    X[int(_F1 + _F0, 2), int(_S1 + _S0, 2)] = U[2, 2]
-                    X[int(_F1 + _F0, 2), int(_S1 + _S1, 2)] = U[2, 3]
-                    # 11 -> [00, 01, 10, 11]
-                    X[int(_F1 + _F1, 2), int(_S0 + _S0, 2)] = U[3, 0]
-                    X[int(_F1 + _F1, 2), int(_S0 + _S1, 2)] = U[3, 1]
-                    X[int(_F1 + _F1, 2), int(_S1 + _S0, 2)] = U[3, 2]
-                    X[int(_F1 + _F1, 2), int(_S1 + _S1, 2)] = U[3, 3]
+                    for i1, i2 in enumerate(_SPAN_2_FIRST):
+                        for j1, j2 in enumerate(_SPAN_2_SECOND):
+                            X[i2, j2] = U[i1, j1]
                     X += X.conj().transpose()
                     my_H += H.scalar * kron_I(X, start_idx, num_qubits - start_idx - 6)
 
