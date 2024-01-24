@@ -1,51 +1,23 @@
-from test import *
-
 from frontend.clock import ClockFrontend
-from hamiltonian_lang import *
-
-n = 4
-exp2_n = 2**n
-
-L = 4
-exp2_L = 2**n
+from test.test_hamiltonian_lang import *
 
 
 # NOTE: this is pretty much my very 1st raw implementation
-
-
 class TestClockFrontend(unittest.TestCase):
-    def project_state(self, ket: str, bra: str, start: int, bound: int) -> sp.spmatrix:
-        assert len(ket) == len(bra), "ket/bra has different length"
-        assert start >= 1, "start index is less than 1, it should be 1-indexed"
-        end = start - 1 + len(ket)
-        assert end <= bound, "'len(ket/bra) + start' exceeds the ending bound"
-
-        size = 2 ** len(ket)
-        ket_bra = sp.lil_matrix((size, size))
-        ket_bra[int(ket, 2), int(bra, 2)] = 1
-
-        return sp.kron(
-            sp.kron(
-                sp.eye(2 ** (start - 1)),
-                ket_bra,
-            ),
-            sp.eye(2 ** (bound - end)),
-        )
-
     def encode_unitary(
         self, unitary: sp.spmatrix, bwd: str, fwd: str, start: int, bound: int
     ):
         assert isinstance(unitary, sp.spmatrix)
         assert len(bwd) == len(fwd)
 
-        return sp.kron(unitary, self.project_state(fwd, bwd, start, bound)) + sp.kron(
-            unitary.conj().transpose(), self.project_state(bwd, fwd, start, bound)
+        return sp.kron(unitary, project_state(fwd, bwd, start, bound)) + sp.kron(
+            unitary.conj().transpose(), project_state(bwd, fwd, start, bound)
         )
 
     def test_H_clock(self):
         clock = sp.lil_matrix((exp2_n, exp2_n))
         for l in range(1, L):
-            clock += self.project_state("01", "01", l, L)
+            clock += project_state("01", "01", l, L)
         H_clock = sp.kron(sp.eye(exp2_n), clock)
 
         assert_sp_matrix_equal(
@@ -63,8 +35,8 @@ class TestClockFrontend(unittest.TestCase):
     def test_H_input(self):
         compu = sp.lil_matrix((exp2_n, exp2_n))
         for i in range(1, n + 1):
-            compu += self.project_state("1", "1", i, n)
-        H_input = sp.kron(compu, self.project_state("0", "0", 1, L))
+            compu += project_state("1", "1", i, n)
+        H_input = sp.kron(compu, project_state("0", "0", 1, L))
 
         assert_sp_matrix_equal(
             H_input,
@@ -72,7 +44,7 @@ class TestClockFrontend(unittest.TestCase):
         )
 
     def test_H_clockinit(self):
-        H_clockinit = sp.kron(sp.eye(exp2_n), self.project_state("1", "1", 1, L))
+        H_clockinit = sp.kron(sp.eye(exp2_n), project_state("1", "1", 1, L))
 
         assert_sp_matrix_equal(
             H_clockinit,
@@ -80,13 +52,13 @@ class TestClockFrontend(unittest.TestCase):
         )
 
     def test_H_l_sum_part_check_clock(self):
-        check_clock = self.project_state("00", "00", 1, L)
-        check_clock += self.project_state("10", "10", 1, L)
-        check_clock += self.project_state("10", "10", L - 1, L)
-        check_clock += self.project_state("11", "11", L - 1, L)
+        check_clock = project_state("00", "00", 1, L)
+        check_clock += project_state("10", "10", 1, L)
+        check_clock += project_state("10", "10", L - 1, L)
+        check_clock += project_state("11", "11", L - 1, L)
         for l in range(2, L):
-            check_clock += self.project_state("100", "100", l - 1, L)
-            check_clock += self.project_state("110", "110", l - 1, L)
+            check_clock += project_state("100", "100", l - 1, L)
+            check_clock += project_state("110", "110", l - 1, L)
 
         check_clock = sp.kron(sp.eye(exp2_n), check_clock)
         print(ClockFrontend("5")._gen_H_l_sum_part_check_clock(n, L))
