@@ -1,4 +1,4 @@
-frontend package
+ac.frontend package
 ================
 
 Subpackages
@@ -7,23 +7,23 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   frontend.compress
+   ac.frontend.compress
 
 Submodules
 ----------
 
-frontend.clock module
+ac.frontend.clock module
 ---------------------
 
-.. automodule:: frontend.clock
+.. automodule:: ac.frontend.clock
    :members:
    :undoc-members:
    :show-inheritance:
 
-frontend.planar\_clock module
+ac.frontend.planar\_clock module
 -----------------------------
 
-.. automodule:: frontend.planar_clock
+.. automodule:: ac.frontend.planar_clock
    :members:
    :undoc-members:
    :show-inheritance:
@@ -31,7 +31,7 @@ frontend.planar\_clock module
 Module contents
 ---------------
 
-.. automodule:: frontend
+.. automodule:: ac.frontend
    :members:
    :undoc-members:
    :show-inheritance:

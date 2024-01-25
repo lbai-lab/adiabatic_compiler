@@ -1,13 +1,13 @@
-frontend.compress package
+ac.frontend.compress package
 =========================
 
 Submodules
 ----------
 
-frontend.compress.compress\_2 module
+ac.frontend.compress.compress\_2 module
 ------------------------------------
 
-.. automodule:: frontend.compress.compress_2
+.. automodule:: ac.frontend.compress.compress_2
    :members:
    :undoc-members:
    :show-inheritance:
@@ -15,7 +15,7 @@ frontend.compress.compress\_2 module
 Module contents
 ---------------
 
-.. automodule:: frontend.compress
+.. automodule:: ac.frontend.compress
    :members:
    :undoc-members:
    :show-inheritance:
