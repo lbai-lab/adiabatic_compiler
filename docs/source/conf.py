@@ -11,10 +11,8 @@ import sys
 # Note:
 print(os.getcwd())
 path = os.path.abspath(os.path.join(__file__, "..", "..", ".."))
-frontend_path = os.path.abspath(
-    os.path.join(__file__, "..", "..", "..", "frontend")
-)
-interpreter_path = os.path.abspath(os.path.join(__file__, "..", "..", "..", "interpreter"))
+frontend_path = os.path.abspath(os.path.join(__file__, "..", "..", "..", "frontend"))
+
 
 print("path: ", path)
 
@@ -24,15 +22,15 @@ def list_directories(path):
     return directories
 
 
-directories_list = list_directories(path)
+print("List of directories in {}: {}".format(path, list_directories(path)))
+print(
+    "List of directories in {}: {}".format(
+        frontend_path, list_directories(frontend_path)
+    )
+)
 
-
-print("List of directories in {}: {}".format(path, directories_list))
-print("List of directories in {}: {}".format(frontend_path, list_directories(frontend_path)))
-
-# sys.path.append(path)
+sys.path.append(path)
 sys.path.append(frontend_path)
-# sys.path.append(interpreter_path)
 
 
 # Configuration file for the Sphinx documentation builder.
