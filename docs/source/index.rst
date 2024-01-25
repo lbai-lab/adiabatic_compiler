@@ -14,6 +14,6 @@ This is documentation for the package `library <https://github.com/lbai-lab/comp
    :maxdepth: 2
    :caption: Frontend Reference
 
-   frontend.clock
-   frontend.planer_clock
-   frontend.compress
+   ac.frontend.clock
+   ac.frontend.planer_clock
+   ac.frontend.compress
