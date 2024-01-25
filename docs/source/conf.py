@@ -28,7 +28,7 @@ directories_list = list_directories(path)
 
 
 print("List of directories in {}: {}".format(path, directories_list))
-print("List of directories in {}: {}".format(frontend_path, directories_list))
+print("List of directories in {}: {}".format(frontend_path, list_directories(frontend_path)))
 
 # sys.path.append(path)
 sys.path.append(frontend_path)
