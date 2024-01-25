@@ -10,8 +10,10 @@ import sys
 # print("CWD======CWD======CWD======CWD======CWD======CWD======CWD======CWD======CWD======CWD======CWD======CWD======CWD======S")
 # Note:
 print(os.getcwd())
-path = os.path.abspath(os.path.join(__file__, "..", "..", ".."))
-frontend_path = os.path.abspath(os.path.join(__file__, "..", "..", "..", "frontend"))
+path = os.path.abspath(os.path.join(__file__, "..", "..", "..", "ac"))
+frontend_path = os.path.abspath(
+    os.path.join(__file__, "..", "..", "..", "ac", "frontend")
+)
 
 
 print("path: ", path)

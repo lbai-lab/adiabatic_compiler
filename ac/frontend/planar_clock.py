@@ -28,11 +28,11 @@ class PlanarClockFrontend(Frontend):
         """Check that input is not FIRST1.
 
         --------------
-        | (r=0, c=0) |  (r=0, c=1)  (r=0, c=2)
-        --------------
         | (r=1, c=0) |  (r=1, c=1)  (r=1, c=2)
         --------------
-        | (r=2, c=0) |  (r=2, c=1)  (r=2, c=2)
+        | (r=2, c=0) |  (r=2, c=1)  (r=1, c=2)
+        --------------
+        | (r=3, c=0) |  (r=3, c=1)  (r=3, c=2)
         --------------
 
         Args:
@@ -217,8 +217,12 @@ class PlanarClockFrontend(Frontend):
                     for x in SPAN_FIRST:
                         arr_pos.append(VertProj(START, x, row=i, col=r + 1))
 
-                arr_neg.append(HoriSymProject([SECOND0, START], [END, FIRST0], row=i, col=r))
-                arr_neg.append(HoriSymProject([SECOND1, START], [END, FIRST1], row=i, col=r))
+                arr_neg.append(
+                    HoriSymProject([SECOND0, START], [END, FIRST0], row=i, col=r)
+                )
+                arr_neg.append(
+                    HoriSymProject([SECOND1, START], [END, FIRST1], row=i, col=r)
+                )
 
         return ScalarSum(
             [ScalarSum(arr_pos), ScalarSum(arr_neg, scalar=-1)], scalar=0.5
@@ -244,10 +248,12 @@ class PlanarClockFrontend(Frontend):
         R = L // (2 * n)
         print(f"n={n}, L={L}, R={R}")
 
-        H_clock = self._gen_H_clock(n, R, L)
         H_input = self._gen_H_input(n, R, L)
         H_clockinit = self._gen_H_clockinit(n, R, L)
+        H_clock = self._gen_H_clock(n, R, L)
         H_l_sum = self._gen_H_l_sum(n, R, L, Us)
+
+        print(reify3(n, R, ScalarSum([H_clockinit])))
 
         return PlanarAdiabaticProgram(
             n,

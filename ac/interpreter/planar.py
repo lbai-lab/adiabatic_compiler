@@ -6,9 +6,6 @@ from frontend.compress import *
 from backend.cpu import CPUBackend
 from qiskit.quantum_info import Operator
 
-# from backend.reify import reify_2local, reify3
-# from backend.cpu import AdiabaticCPUExecutable
-
 
 class PlanarClockInterpreter(Interpreter):
     def __init__(self) -> None:
@@ -31,4 +28,4 @@ class PlanarClockInterpreter(Interpreter):
             [sp.csc_matrix(x) for x in gates]
         )
 
-        return CPUBackend().run(program)
+        # return CPUBackend().run(program)
