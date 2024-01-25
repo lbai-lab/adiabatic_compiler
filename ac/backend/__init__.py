@@ -1,6 +1,3 @@
-from frontend import *
-
-
 class Backend:
     """Backend class."""
 

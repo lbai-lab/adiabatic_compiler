@@ -1,1 +1,1 @@
-from frontend.compress.compress_2 import *
+from ac.frontend.compress.compress_2 import *

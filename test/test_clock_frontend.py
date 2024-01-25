@@ -1,4 +1,4 @@
-from frontend.clock import ClockFrontend
+from ac.frontend.clock import ClockFrontend
 from test.test_hamiltonian_lang import *
 
 

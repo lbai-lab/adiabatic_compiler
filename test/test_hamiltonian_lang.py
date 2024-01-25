@@ -1,6 +1,6 @@
 from test import *
 
-from hamiltonian_lang import *
+from ac.hamiltonian_lang import *
 
 n = 4
 exp2_n = 2**n
@@ -32,9 +32,7 @@ class TestHamiltonianLanguage(unittest.TestCase):
     # unnecssary since this is a constant
     def test_Identity(self):
         for i in range(1, n + 1):
-            assert_sp_matrix_equal(
-                compile_expr(Identity(i)), sp.eye(2**i)
-            )
+            assert_sp_matrix_equal(compile_expr(Identity(i)), sp.eye(2**i))
 
     # unnecssary since this is a constant
     def test_ProjectState(self):

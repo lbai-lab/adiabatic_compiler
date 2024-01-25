@@ -3,9 +3,9 @@ from typing import Literal
 import numpy as np
 import scipy.sparse as sp
 
-from frontend import *
-from frontend.compress import *
-from hamiltonian_lang import *
+from ac.frontend import *
+from ac.frontend.compress import *
+from ac.hamiltonian_lang import *
 
 
 class ClockFrontend(Frontend):

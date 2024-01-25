@@ -1,10 +1,11 @@
-from qiskit import QuantumCircuit, transpile
-from interpreter import Interpreter
-from frontend.planar_clock import PlanarClockFrontend
 import scipy.sparse as sp
-from frontend.compress import *
-from backend.cpu import CPUBackend
+from qiskit import QuantumCircuit, transpile
 from qiskit.quantum_info import Operator
+
+from ac.backend.cpu import CPUBackend
+from ac.frontend.compress import *
+from ac.frontend.planar_clock import PlanarClockFrontend
+from ac.interpreter import Interpreter
 
 
 class PlanarClockInterpreter(Interpreter):

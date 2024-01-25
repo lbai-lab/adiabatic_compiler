@@ -1,7 +1,7 @@
 from qiskit import QuantumCircuit, transpile
 from qiskit_aer import AerSimulator
 
-from interpreter import Interpreter
+from ac.interpreter import Interpreter
 
 
 class GateBasedInterpreter(Interpreter):
