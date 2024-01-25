@@ -12,7 +12,7 @@ import sys
 print(os.getcwd())
 path = os.path.abspath(os.path.join(__file__, "..", "..", ".."))
 frontend_path = os.path.abspath(
-    os.path.join(__file__, "..", "..", "..", "frontend", "compress")
+    os.path.join(__file__, "..", "..", "..", "frontend")
 )
 interpreter_path = os.path.abspath(os.path.join(__file__, "..", "..", "..", "interpreter"))
 
