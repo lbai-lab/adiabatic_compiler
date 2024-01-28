@@ -11,18 +11,23 @@ copyright = '2024, Haoyuan Tan & Daniel Huang'
 author = 'Haoyuan Tan & Daniel Huang'
 release = '0.1'
 
-# -- General configuration ---------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
+# -- General configuration
+extensions = [
+    "sphinx.ext.duration",
+    "sphinx.ext.doctest",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.intersphinx",
+    "nbsphinx",
+    "sphinx.ext.napoleon",
+]
+# templates_path = ['_templates']
+# exclude_patterns = []
 
-extensions = []
-
-templates_path = ['_templates']
-exclude_patterns = []
 
 
+# # -- Options for HTML output -------------------------------------------------
+# # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-# -- Options for HTML output -------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
-
-html_theme = 'alabaster'
-html_static_path = ['_static']
+# html_theme = 'alabaster'
+# html_static_path = ['_static']
