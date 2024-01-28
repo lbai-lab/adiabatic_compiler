@@ -23,10 +23,10 @@ release = "0.1"
 # -- General configuration
 extensions = [
     "sphinx.ext.autodoc",
-    "sphinx.ext.autosummary",
+    "sphinx.ext.napoleon",
+    # "sphinx.ext.autosummary",
     # "sphinx.ext.intersphinx",
-    # "nbsphinx",
-    # "sphinx.ext.napoleon",
+    "nbsphinx",
 ]
 
 # -- Options for HTML output
