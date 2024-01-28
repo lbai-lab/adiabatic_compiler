@@ -6,6 +6,11 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
+import os
+import sys
+
+sys.path.append(os.path.abspath("../../ac"))
+
 project = "Adiabatic Compiler"
 copyright = "2024, Haoyuan Tan & Daniel Huang"
 author = "Haoyuan Tan & Daniel Huang"
