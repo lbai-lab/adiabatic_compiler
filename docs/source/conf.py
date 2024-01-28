@@ -6,6 +6,10 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
+# command line procedures
+# 1. sphinx-apidoc -o docs/source ac
+# 2. sphinx-build -b html docs/source/ docs/build/html
+
 import os
 import sys
 
@@ -19,7 +23,7 @@ release = "0.1"
 # -- General configuration
 extensions = [
     "sphinx.ext.autodoc",
-    # "sphinx.ext.autosummary",
+    "sphinx.ext.autosummary",
     # "sphinx.ext.intersphinx",
     # "nbsphinx",
     # "sphinx.ext.napoleon",

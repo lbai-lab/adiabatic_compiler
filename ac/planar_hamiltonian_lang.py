@@ -54,11 +54,13 @@ class Identity(PlanarHamExpr):
         return f"I({self.n})_({self.row}, {self.col})"
 
 
-class SingProj(PlanarHamExpr):
-    """Single 2-local Hamiltonian.
-
+"""
     |p><p|
-    """
+"""
+
+
+class SingProj(PlanarHamExpr):
+    """Single 2-local Hamiltonian."""
 
     def __init__(self, state: str, row: int, col: int) -> None:
         super().__init__(row, col)
@@ -68,12 +70,14 @@ class SingProj(PlanarHamExpr):
         return f"P({self.state})_{self.row, self.col}"
 
 
-class VertProj(PlanarHamExpr):
-    """Vertical 2-local Hamiltonian.
-
+"""
     |p_1 > < p_1|
     |p_2 > < p_2|
-    """
+"""
+
+
+class VertProj(PlanarHamExpr):
+    """Vertical 2-local Hamiltonian."""
 
     def __init__(self, state1: str, state2: str, row: int, col: int) -> None:
         super().__init__(row, col)
@@ -84,11 +88,13 @@ class VertProj(PlanarHamExpr):
         return f"VP({self.state1}, {self.state2})_({self.row}, {self.col})"
 
 
-class HoriProj(PlanarHamExpr):
-    """Horizontal 2-local Hamiltonian.
-
+"""
     |p_1 p_2> <p_1 p_2|
-    """
+"""
+
+
+class HoriProj(PlanarHamExpr):
+    """Horizontal 2-local Hamiltonian."""
 
     def __init__(self, state1: str, state2: str, row: int, col: int) -> None:
         super().__init__(row, col)
@@ -99,11 +105,13 @@ class HoriProj(PlanarHamExpr):
         return f"HP({self.state1}, {self.state2})_({self.row}, {self.col})"
 
 
-class HoriSymProject(PlanarHamExpr):
-    """Horizontal 2-local Hamiltonian.
-
+"""
     |p_1 p_2><p_3 p_4| + |p_3 p_4><p_1 p_2|
-    """
+"""
+
+
+class HoriSymProject(PlanarHamExpr):
+    """Horizontal 2-local Hamiltonian."""
 
     def __init__(
         self, states1: tuple[str, str], states2: tuple[str, str], row: int, col: int
@@ -208,16 +216,18 @@ q_4        q_10
 # Utility
 # ==============================================================================
 
+"""
+    q_2
+    |
+    | q_0
+    |/ 
+    q_1
+"""
+
 
 def encode3(st: str) -> str:
     """Particle to 3 qubits.
 
-    q_2
-    |\
-    | \q_0
-    |/ 
-    q_1
-    
     Args:
         st (str): Particle State
 
