@@ -1,12 +1,11 @@
 from qiskit import QuantumCircuit
 from itertools import permutations
 from qiskit.converters import circuit_to_dag, dag_to_circuit
-from enum import Enum
 
 # TODO: put every compress in single file
 
 
-class Compress(Enum):
+class Compress:
     no = "no"
     all = "all"
     all_half = "all-half"

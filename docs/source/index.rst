@@ -10,7 +10,7 @@ Welcome to Adiabatic Compiler's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   modules
+   generated/modules
 
 Indices and tables
 ==================
