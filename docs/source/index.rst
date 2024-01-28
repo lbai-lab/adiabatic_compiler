@@ -1,19 +1,20 @@
-Compile to Adiabatic Documentation
-===================================
+.. Adiabatic Compiler documentation master file, created by
+   sphinx-quickstart on Sat Jan 27 16:30:39 2024.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
 
-This is documentation for the package `library <https://github.com/lbai-lab/compile_to_adiabatic>`_.
-
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Quick Start
-
-   quick_start/Quick_Start.ipynb
+Welcome to Adiabatic Compiler's documentation!
+==============================================
 
 .. toctree::
    :maxdepth: 2
-   :caption: Frontend Reference
+   :caption: Contents:
 
-   ac.frontend.clock
-   ac.frontend.planer_clock
-   ac.frontend.compress
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

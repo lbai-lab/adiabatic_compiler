@@ -1,76 +1,28 @@
-# -- Path Setup ----------------------------------------------------------------------
-
-# if extensions (or modules to document with autodoc) are in another directory add these directories
-# to sys.path here. If the directory is relative to the documentation root, use
-# os.path.abspath to make it absolute
-import os
-import sys
-
-# sys.path.insert(0, os.path.abspath('../../'))
-# print("CWD======CWD======CWD======CWD======CWD======CWD======CWD======CWD======CWD======CWD======CWD======CWD======CWD======S")
-# Note:
-print(os.getcwd())
-path = os.path.abspath(os.path.join(__file__, "..", "..", "..", "ac"))
-frontend_path = os.path.abspath(
-    os.path.join(__file__, "..", "..", "..", "ac", "frontend")
-)
-
-
-print("path: ", path)
-
-
-def list_directories(path):
-    directories = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
-    return directories
-
-
-print("List of directories in {}: {}".format(path, list_directories(path)))
-print(
-    "List of directories in {}: {}".format(
-        frontend_path, list_directories(frontend_path)
-    )
-)
-
-sys.path.append(path)
-sys.path.append(frontend_path)
-
-
 # Configuration file for the Sphinx documentation builder.
+#
+# For the full list of built-in configuration values, see the documentation:
+# https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-# -- Project information
+# -- Project information -----------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "CompileToAdiabatic"
-copyright = "The CompileToAdiabatic authors"
-author = "Haoyuan Tan & Daniel Huang"
+project = 'Adiabatic Compiler'
+copyright = '2024, Haoyuan Tan & Daniel Huang'
+author = 'Haoyuan Tan & Daniel Huang'
+release = '0.1'
 
-release = "0.1"
-version = "0.1.0"
+# -- General configuration ---------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-# -- General configuration
+extensions = []
 
-extensions = [
-    "sphinx.ext.duration",
-    "sphinx.ext.doctest",
-    "sphinx.ext.autodoc",
-    "sphinx.ext.autosummary",
-    "sphinx.ext.intersphinx",
-    "nbsphinx",
-    "sphinx.ext.napoleon",
-]
-autodoc_mock_imports = ["tqdm", "numpy"]
+templates_path = ['_templates']
+exclude_patterns = []
 
-intersphinx_mapping = {
-    "python": ("https://docs.python.org/3/", None),
-    "sphinx": ("https://www.sphinx-doc.org/en/master/", None),
-}
-intersphinx_disabled_domains = ["std"]
-nbsphinx_allow_errors = True
-templates_path = ["_templates"]
 
-# -- Options for HTML output
 
-html_theme = "sphinx_rtd_theme"
+# -- Options for HTML output -------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-# -- Options for EPUB output
-epub_show_urls = "footnote"
-autosummary_generate = True  # Turn on sphinx.ext.autosummary
+html_theme = 'alabaster'
+html_static_path = ['_static']
