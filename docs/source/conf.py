@@ -22,7 +22,7 @@ release = "0.1"
 
 # -- General configuration
 extensions = [
-    # "sphinx.ext.autodoc",
+    "sphinx.ext.autodoc",
     # "sphinx.ext.napoleon",
     # "sphinx.ext.autosummary",
     # "sphinx.ext.intersphinx",
