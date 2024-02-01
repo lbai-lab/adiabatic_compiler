@@ -23,12 +23,10 @@ release = "0.1"
 # -- General configuration
 extensions = [
     "sphinx.ext.autodoc",
-    # "sphinx.ext.napoleon",
-    # "sphinx.ext.autosummary",
-    # "sphinx.ext.intersphinx",
-    # "nbsphinx",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.intersphinx",
+    "nbsphinx",
 ]
-
 # -- Options for HTML output
 html_theme = "sphinx_rtd_theme"
 
@@ -47,4 +45,4 @@ html_theme = "sphinx_rtd_theme"
 # autosummary_generate = True  # Turn on sphinx.ext.autosummary
 
 # templates_path = ['_templates']
-exclude_patterns = ["generated/setup.rst"]
+# exclude_patterns = ["generated/setup.rst"]

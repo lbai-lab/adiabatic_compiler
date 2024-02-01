@@ -1,7 +1,7 @@
 import scipy.sparse as sp
 
-from hamiltonian_lang import HamExpr, compile_expr
-from planar_hamiltonian_lang import PlanarHamExpr, reify3
+from language.hamiltonian import HamExpr, compile_expr
+from language.planar_hamiltonian import PlanarHamExpr, reify3
 
 
 class ClockAdiabaticProgram:

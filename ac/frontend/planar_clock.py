@@ -2,7 +2,7 @@ import numpy as np
 import scipy.sparse as sp
 
 from frontend import Frontend, PlanarAdiabaticProgram
-from planar_hamiltonian_lang import *
+from language.planar_hamiltonian import *
 
 # Sunny's note, I use all 1-index to match paper
 # they will be converted to 0 index in Grid class/method

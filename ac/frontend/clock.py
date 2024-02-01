@@ -5,7 +5,7 @@ import scipy.sparse as sp
 
 from frontend import *
 from frontend.compress import *
-from hamiltonian_lang import *
+from language.hamiltonian import *
 
 
 class ClockFrontend(Frontend):
