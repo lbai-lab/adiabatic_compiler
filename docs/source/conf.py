@@ -25,7 +25,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
     "sphinx.ext.intersphinx",
-    "nbsphinx",
+    # "nbsphinx",
 ]
 # -- Options for HTML output
 html_theme = "sphinx_rtd_theme"

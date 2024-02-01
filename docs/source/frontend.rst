@@ -1,13 +1,13 @@
-frontend package
+frontend module
 ================
 
-Subpackages
------------
+Module contents
+---------------
 
-.. toctree::
-   :maxdepth: 4
-
-   frontend.compress
+.. automodule:: frontend
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Submodules
 ----------
@@ -28,10 +28,10 @@ frontend.planar\_clock module
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
+Subpackages
+-----------
 
-.. automodule:: frontend
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. toctree::
+   :maxdepth: 1
+
+   frontend.compress

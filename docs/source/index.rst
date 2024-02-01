@@ -7,10 +7,13 @@ Welcome to Adiabatic Compiler's documentation!
 ==============================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
 
-   generated/modules
+   interpreter
+   frontend
+   backend
+   language
 
 Indices and tables
 ==================

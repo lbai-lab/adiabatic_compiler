@@ -1,7 +1,7 @@
-hamiltonian\_lang module
+language.hamiltonian
 ========================
 
-.. automodule:: hamiltonian_lang
+.. automodule:: language.hamiltonian
    :members:
    :undoc-members:
    :show-inheritance:
