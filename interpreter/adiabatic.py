@@ -15,7 +15,7 @@ from interpreter import Interpreter
 # ==============================================================================
 
 
-def transpile_two(qc: QuantumCircuit) -> QuantumCircuit:
+def _transpile_two(qc: QuantumCircuit) -> QuantumCircuit:
     """Convert a circuit to only use 2-input gates.
 
     Args:
@@ -38,25 +38,29 @@ def transpile_two(qc: QuantumCircuit) -> QuantumCircuit:
     return qc_p
 
 
-def spmat_to_str(spmat: sp.spmatrix) -> str:
-    return (
-        "["
-        + ", ".join(
-            [
-                "[" + ", ".join([str(x) for x in row]) + "]"
-                for row in np.array(spmat.todense())
-            ]
-        )
-        + "]"
-    )
-
-
 # ==============================================================================
 # Interpreter
 # ==============================================================================
 
 
 class AdiabaticInterpreter(Interpreter):
+    """
+    The interpreter built based on Section 3  (5-local) and Section 4 (3-local)
+    from this paper: https://epubs.siam.org/doi/abs/10.1137/S0097539705447323,
+    integrated with muiltiple options and optimizations when intialized.
+
+
+    Args:
+        locality (Literal["5", "3"], optional): 5- or 3-local conversion. Defaults to "5".
+        compress (Compress, optional): Option to compress the input circuit. Defaults to Compress.no.
+        end_i (int, optional): Number of identities added to the end of input circuit. Defaults to 0.
+        transpile_to_two (bool, optional): Transpile the input circuit to contain only 2-qubit gates. Defaults to False.
+        info (bool, optional): Print all information. Defaults to True.
+
+    Returns:
+        dict: Results after running the circuit.
+    """
+
     def __init__(
         self,
         locality: Literal["5", "3"] = "5",
@@ -73,21 +77,21 @@ class AdiabaticInterpreter(Interpreter):
         self.info = info  # should we print?
 
     def run(self, qc: QuantumCircuit, num_shots=1024, all_histories=False) -> dict:
-        """Run the circuit.
+        """Convert and run the circuit.
 
         Args:
             qc (QuantumCircuit): Quantum circuit to run.
             num_shots (int, optional): Number of shots to run the circuit for. Defaults to 1024.
-            all_histories (bool, optional): Return results of clock states as well. Defaults to False.
+            all_histories (bool, optional): Return unprocessed results with clock states. Defaults to False.
 
         Returns:
-            dict: Histogram of qubit measurements.
+            dict: Results after running the circuit.
         """
         qc_orig = qc
 
         # 1. transpile to get "L 2-qubit gates" as stated in the theorem
         if self.transpile_to_two:
-            qc = transpile_two(qc_orig)
+            qc = _transpile_two(qc_orig)
 
         # 2. compress gates if prompted
         gates, qubit_map = compress_circuit(qc, self.compress)

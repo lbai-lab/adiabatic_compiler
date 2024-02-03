@@ -9,11 +9,24 @@ from interpreter import Interpreter
 
 
 class PlanarClockInterpreter(Interpreter):
-    def __init__(self) -> None:
-        """Gate-based interpreter."""
-        super().__init__()
+    """
+    The interpreter built based on Section 5  (2-local)
+    from this paper: https://epubs.siam.org/doi/abs/10.1137/S0097539705447323,
+    Work In Progress!!!
+    """
 
     def run(self, num_shots=1024) -> dict:
+        """Convert and run the circuit.
+
+        Args:
+            qc (QuantumCircuit): Quantum circuit to run.
+            num_shots (int, optional): Number of shots to run the circuit for. Defaults to 1024.
+            all_histories (bool, optional): Return unprocessed results with clock states. Defaults to False.
+
+        Returns:
+            dict: Results after running the circuit.
+        """
+
         # currently use an example circuit of the bell state
         gates = []
         qc = QuantumCircuit(1)

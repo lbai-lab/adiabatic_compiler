@@ -1,23 +1,24 @@
 interpreter module
-===================
+==================
 
-Module contents
----------------
+Abstract parent class
+---------------------
 
 .. automodule:: interpreter
    :members:
    :undoc-members:
    :show-inheritance:
 
-Submodules
-----------
 
-.. automodule:: interpreter.adiabatic
+Implemented interpreters
+------------------------
+
+.. automodule:: interpreter.gate
    :members:
    :undoc-members:
    :show-inheritance:
 
-.. automodule:: interpreter.gate
+.. automodule:: interpreter.adiabatic
    :members:
    :undoc-members:
    :show-inheritance:
