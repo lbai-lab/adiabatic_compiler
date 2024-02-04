@@ -1,4 +1,4 @@
-frontend.compress package
+frontend.compress module
 =========================
 
 Module contents

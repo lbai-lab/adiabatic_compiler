@@ -1,11 +1,28 @@
 from typing import Literal
 
 import numpy as np
-import scipy.sparse as sp
 
 from frontend import *
 from frontend.compress import *
 from language.hamiltonian import *
+
+
+class ClockAdiabaticProgram(AdiabaticProgram):
+    def __init__(
+        self,
+        num_state: int,
+        num_clock: int,
+        H_init: HamExpr,
+        H_final: HamExpr,
+        total_time: float,
+        time_steps: int,
+    ):
+        super.__init__(H_init, H_final, total_time, time_steps, num_state + num_clock)
+        self.num_state = num_state
+        self.num_clock = num_clock
+
+    def compile(self):
+        return compile_expr(self.H_init), compile_expr(self.H_final)
 
 
 class ClockFrontend(Frontend):

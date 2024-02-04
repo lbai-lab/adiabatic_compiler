@@ -1,6 +1,5 @@
 from typing import Literal
 
-import numpy as np
 import scipy.sparse as sp
 from qiskit import QuantumCircuit, transpile
 from qiskit.quantum_info import Operator
@@ -51,14 +50,11 @@ class AdiabaticInterpreter(Interpreter):
 
 
     Args:
-        locality (Literal["5", "3"], optional): 5- or 3-local conversion. Defaults to "5".
+        locality (Literal["5", "3"], optional): 5- or 3-local translation. Defaults to "5".
         compress (Compress, optional): Option to compress the input circuit. Defaults to Compress.no.
         end_i (int, optional): Number of identities added to the end of input circuit. Defaults to 0.
         transpile_to_two (bool, optional): Transpile the input circuit to contain only 2-qubit gates. Defaults to False.
         info (bool, optional): Print all information. Defaults to True.
-
-    Returns:
-        dict: Results after running the circuit.
     """
 
     def __init__(

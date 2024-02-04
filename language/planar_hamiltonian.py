@@ -1,4 +1,5 @@
-import scipy.sparse as sp
+from language import *
+
 from itertools import product
 
 # ==============================================================================
@@ -21,7 +22,7 @@ SPAN_SECOND = [SECOND0, SECOND1]
 # ==============================================================================
 
 
-class PlanarHamExpr:
+class PlanarHamExpr(ExpressionBase):
     """Planar Hamiltonian Expression.
 
     Example:

@@ -1,4 +1,4 @@
-import scipy.sparse as sp
+from language import *
 
 """[Note] A language for expressing Hamiltonian matrices.
 
@@ -16,7 +16,7 @@ Real-valued diagonal matrices
 # ==============================================================================
 
 
-class HamExpr:
+class HamExpr(ExpressionBase):
     """Hermitian"""
 
     pass

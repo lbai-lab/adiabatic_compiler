@@ -4,7 +4,7 @@ from qiskit import QuantumCircuit
 class Interpreter:
     """ 
     The parent class of all interpreters.
-    It is the entry point of the conversion.
+    It is the entry point of the translation.
     """
 
     def __init__(self) -> None:

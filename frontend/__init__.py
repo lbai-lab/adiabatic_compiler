@@ -1,64 +1,53 @@
-import scipy.sparse as sp
-
-from language.hamiltonian import HamExpr, compile_expr
-from language.planar_hamiltonian import PlanarHamExpr, reify3
+from language import *
 
 
-class ClockAdiabaticProgram:
+class AdiabaticProgram:
+    """
+    The adiabatic program stores the required data for AQC.
+    It should be returned from Frontend after converted,
+    and then passed to the Backend to run as adiabatic.
+
+    Args:
+        H_init (ExpressionBase): The language expression of the initial Hamiltonian.
+        H_final (ExpressionBase): The language expression of the final Hamiltonian.
+        total_time (float): The running time for the AQC.
+        time_steps (int): The number of time steps.
+        num_all (int): The number of all qubits, including both state and clock qubits.
+    """
+
     def __init__(
         self,
-        num_state: int,
-        num_clock: int,
-        H_init: HamExpr,
-        H_final: HamExpr,
+        H_init: ExpressionBase,
+        H_final: ExpressionBase,
         total_time: float,
         time_steps: int,
-    ):
-        self.num_state = num_state
-        self.num_clock = num_clock
+        num_all: int,
+    ) -> None:
         self.H_init = H_init
         self.H_final = H_final
         self.total_time = total_time
         self.time_steps = time_steps
-        self.num_all = num_state + num_clock
+        self.num_all = num_all
 
-    def compile(self):
-        return compile_expr(self.H_init), compile_expr(self.H_final)
+    def compile(self) -> tuple[sp.spmatrix, sp.spmatrix]:
+        """
+        Compile the language expression of the Hamiltonians.
 
-
-class PlanarAdiabaticProgram:
-    def __init__(
-        self,
-        num_state: int,
-        num_round: int,
-        num_clock: int,
-        H_init: PlanarHamExpr,
-        H_final: PlanarHamExpr,
-        total_time: float,
-        time_steps: int,
-    ):
-        self.num_state = num_state
-        self.num_round = num_round
-        self.num_clock = num_clock
-        self.H_init = H_init
-        self.H_final = H_final
-        self.total_time = total_time
-        self.time_steps = time_steps
-        self.num_all = num_state * (num_round + 1) * 3
-
-    def compile(self):
-        return (
-            reify3(self.num_state, self.num_round, self.H_init),
-            reify3(self.num_state, self.num_round, self.H_final),
-        )
+        Returns:
+            tuple[sp.spmatrix, sp.spmatrix]: The compiled Hamiltonians.
+        """
+        raise NotImplementedError()
 
 
 class Frontend:
-    def __init__(self) -> None:
-        pass
+    """
+    Frontend is where the real translation happens.
+    It is the implementation of the proposed translation of the papers we found.
+    """
 
-    def unitaries_to_program(self, Us: list[sp.spmatrix]):
-        """Translate a list of unitaries into an adiabatic program.
+    def unitaries_to_program(self, Us: list[sp.spmatrix]) -> AdiabaticProgram:
+        """
+        Translate a list of unitaries into an adiabatic program.
 
         Args:
             Us (list[sp.spmatrix]): list of unitaries.

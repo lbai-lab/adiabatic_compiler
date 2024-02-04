@@ -10,7 +10,7 @@ from frontend import *
 class CPUBackend(Backend):
     def run(
         self,
-        adiabatic_program: ClockAdiabaticProgram | PlanarAdiabaticProgram,
+        adiabatic_program: AdiabaticProgram,
         num_shots=1024,
     ) -> dict:
         H_init, H_final = adiabatic_program.compile()

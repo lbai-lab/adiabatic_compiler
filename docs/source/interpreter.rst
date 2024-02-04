@@ -1,8 +1,8 @@
 interpreter module
 ==================
 
-Abstract parent class
----------------------
+Module contents (__init___.py)
+------------------------------
 
 .. automodule:: interpreter
    :members:
@@ -13,19 +13,9 @@ Abstract parent class
 Implemented interpreters
 ------------------------
 
-Each interpreter is placed in the individual file.
+.. toctree::
+   :maxdepth: 2
 
-.. automodule:: interpreter.gate
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-.. automodule:: interpreter.adiabatic
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-.. automodule:: interpreter.planar
-   :members:
-   :undoc-members:
-   :show-inheritance:
+   interpreter/gate
+   interpreter/adiabatic
+   interpreter/planar

@@ -1,8 +1,8 @@
 frontend module
-================
+===============
 
-Module contents
----------------
+Module contents (__init___.py)
+------------------------------
 
 .. automodule:: frontend
    :members:
@@ -12,26 +12,16 @@ Module contents
 Submodules
 ----------
 
-frontend.clock module
----------------------
-
-.. automodule:: frontend.clock
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-frontend.planar\_clock module
------------------------------
-
-.. automodule:: frontend.planar_clock
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Subpackages
------------
-
 .. toctree::
    :maxdepth: 1
 
    frontend.compress
+
+Implemented frontends
+-------------------------------------------
+
+.. toctree::
+   :maxdepth: 2
+
+   frontend/clock
+   frontend/planar_clock

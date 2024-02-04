@@ -1,11 +1,36 @@
 import numpy as np
-import scipy.sparse as sp
 
-from frontend import Frontend, PlanarAdiabaticProgram
+from frontend import *
+from frontend.compress import *
 from language.planar_hamiltonian import *
 
 # Sunny's note, I use all 1-index to match paper
 # they will be converted to 0 index in Grid class/method
+
+
+class PlanarAdiabaticProgram(AdiabaticProgram):
+    def __init__(
+        self,
+        num_state: int,
+        num_round: int,
+        num_clock: int,
+        H_init: PlanarHamExpr,
+        H_final: PlanarHamExpr,
+        total_time: float,
+        time_steps: int,
+    ):
+        super.__init__(
+            H_init, H_final, total_time, time_steps, num_state * (num_round + 1) * 3
+        )
+        self.num_state = num_state
+        self.num_round = num_round
+        self.num_clock = num_clock
+
+    def compile(self):
+        return (
+            reify3(self.num_state, self.num_round, self.H_init),
+            reify3(self.num_state, self.num_round, self.H_final),
+        )
 
 
 class PlanarClockFrontend(Frontend):
