@@ -22,14 +22,14 @@ class TestClockFrontend(unittest.TestCase):
 
         assert_sp_matrix_equal(
             H_clock,
-            compile_expr(ClockFrontend("5")._gen_H_clock(n, L)),
+            compile_expr(ClockFrontend("5").gen_H_clock(n, L)),
         )
 
         H_clock = L**6 * sp.kron(sp.eye(exp2_n), clock)
 
         assert_sp_matrix_equal(
             H_clock,
-            compile_expr(ClockFrontend("3")._gen_H_clock(n, L)),
+            compile_expr(ClockFrontend("3").gen_H_clock(n, L)),
         )
 
     def test_H_input(self):
@@ -40,7 +40,7 @@ class TestClockFrontend(unittest.TestCase):
 
         assert_sp_matrix_equal(
             H_input,
-            compile_expr(ClockFrontend("5")._gen_H_input(n, L)),
+            compile_expr(ClockFrontend("5").gen_H_input(n, L)),
         )
 
     def test_H_clockinit(self):
@@ -48,7 +48,7 @@ class TestClockFrontend(unittest.TestCase):
 
         assert_sp_matrix_equal(
             H_clockinit,
-            compile_expr(ClockFrontend("5")._gen_H_clockinit(n, L)),
+            compile_expr(ClockFrontend("5").gen_H_clockinit(n, L)),
         )
 
     def test_H_l_sum_part_check_clock(self):
@@ -61,10 +61,10 @@ class TestClockFrontend(unittest.TestCase):
             check_clock += project_state("110", "110", l - 1, L)
 
         check_clock = sp.kron(sp.eye(exp2_n), check_clock)
-        print(ClockFrontend("5")._gen_H_l_sum_part_check_clock(n, L))
+        print(ClockFrontend("5").gen_H_l_sum_part_check_clock(n, L))
         assert_sp_matrix_equal(
             check_clock,
-            compile_expr(ClockFrontend("5")._gen_H_l_sum_part_check_clock(n, L)),
+            compile_expr(ClockFrontend("5").gen_H_l_sum_part_check_clock(n, L)),
         )
 
     def test_H_l_sum_part_unitary(self):
@@ -111,7 +111,7 @@ class TestClockFrontend(unittest.TestCase):
         gates.pop(0)
         assert_sp_matrix_equal(
             encoded_unitaries,
-            compile_expr(ClockFrontend("5")._gen_H_l_sum_part_unitary(new_L, gates)),
+            compile_expr(ClockFrontend("5").gen_H_l_sum_part_unitary(new_L, gates)),
         )
 
         gates = [None] + gates
@@ -122,5 +122,5 @@ class TestClockFrontend(unittest.TestCase):
         gates.pop(0)
         assert_sp_matrix_equal(
             encoded_unitaries,
-            compile_expr(ClockFrontend("3")._gen_H_l_sum_part_unitary(new_L, gates)),
+            compile_expr(ClockFrontend("3").gen_H_l_sum_part_unitary(new_L, gates)),
         )

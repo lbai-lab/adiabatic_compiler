@@ -8,17 +8,24 @@ from language.hamiltonian import *
 
 
 class ClockAdiabaticProgram(AdiabaticProgram):
+    """
+    Args:
+        num_data (int): The number of data qubits.
+        num_clock (int): The number of clock qubits.
+        ...: refer to the parent class
+    """
+
     def __init__(
         self,
-        num_state: int,
+        num_data: int,
         num_clock: int,
         H_init: HamExpr,
         H_final: HamExpr,
         total_time: float,
         time_steps: int,
     ):
-        super.__init__(H_init, H_final, total_time, time_steps, num_state + num_clock)
-        self.num_state = num_state
+        super.__init__(H_init, H_final, total_time, time_steps, num_data + num_clock)
+        self.num_data = num_data
         self.num_clock = num_clock
 
     def compile(self):
@@ -26,15 +33,14 @@ class ClockAdiabaticProgram(AdiabaticProgram):
 
 
 class ClockFrontend(Frontend):
-    """Implement clock translation following:
-    https://epubs.siam.org/doi/abs/10.1137/S0097539705447323
+    """Implement clock translation from Section 3 and 4 from this paper:
+    https://arxiv.org/abs/quant-ph/0405098.
+
+    Args:
+        locality (Literal["3", "5"]): The locality of the generated Hamiltonian.
     """
 
     def __init__(self, locality: Literal["3", "5"]) -> None:
-        """
-        Args:
-            locality (Literal[&quot;3&quot;, &quot;5&quot;]): K-locality of the generated Hamiltonian.
-        """
         if locality not in ("3", "5"):
             raise ValueError(
                 f"Expected locality to be 3 or 5 but obtained a locality of {locality} instead ..."
@@ -42,17 +48,16 @@ class ClockFrontend(Frontend):
         super().__init__()
         self.locality = locality
 
-    def _gen_H_clock(self, n: int, L: int) -> HamExpr:
-        """bottom of page 10, https://arxiv.org/pdf/quant-ph/0405098.pdf
-
-        H_clock := Sum_{l=1}^{L-1} |01><01|_{l,l+1}^c,
+    def gen_H_clock(self, n: int, L: int) -> HamExpr:
+        """H_clock, at the bottom of page 10.
+        Adding energy to any two consective clock qubits that are "01".
 
         Args:
-            n (int): number of computational qubits.
-            L (int): number of gates.
+            n (int): number of data qubits.
+            L (int): number of clock qubits.
 
         Returns:
-            HamExpr: Hamiltonian that checks that the clock is prefixed by all 1's.
+            HamExpr: Hamiltonian that ensures legal clock states.
         """
         H_clock = Summation(
             [
@@ -73,17 +78,16 @@ class ClockFrontend(Frontend):
 
         return KronDiagonal(Identity(n), H_clock)
 
-    def _gen_H_input(self, n: int, L: int) -> HamExpr:
-        """top of page 11, https://arxiv.org/pdf/quant-ph/0405098.pdf
-
-        H_input := (Sum_{i=1}^n |1><1|_i) ⨂ |0><0|_{1}^c
+    def gen_H_input(self, n: int, L: int) -> HamExpr:
+        """H_input, at the top of page 11.
+        Adding energy to any data qubit that is "1" while the 1st clock qubit is "0".
 
         Args:
-            n (int): number of computational qubits.
-            L (int): number of gates.
+            n (int): number of data qubits.
+            L (int): number of clock qubits.
 
         Returns:
-            HamExpr: Hamiltonian that checks that the input is all 0's.
+            HamExpr: Hamiltonian that ensures that the input is all "0" when the 1st clock qubit as "0".
         """
         return KronDiagonal(
             Summation(
@@ -101,24 +105,33 @@ class ClockFrontend(Frontend):
             KronDiagonal(ProjectState("0"), Identity(L - 1)),
         )
 
-    def _gen_H_clockinit(self, n: int, L: int) -> HamExpr:
-        """top of page 11, https://arxiv.org/pdf/quant-ph/0405098.pdf
-
-        H_clockinit := |1><1|_{1}^c
+    def gen_H_clockinit(self, n: int, L: int) -> HamExpr:
+        """H_clockinit, at the top of page 11.
+        Adding energy to 1st clock qubit when it is "1".
 
         Args:
-            n (int): number of computational qubits.
-            L (int): number of gates.
+            n (int): number of data qubits.
+            L (int): number of clock qubits.
 
         Returns:
-            HamExpr: Hamiltonian that checks that the clock is all 0's at start.
+            HamExpr: Hamiltonian that ensures that the 1st clock qubit is "0".
         """
         return KronDiagonal(
             Identity(n),
             KronDiagonal(ProjectState("1"), Identity(L - 1)),
         )
 
-    def _gen_H_l_sum_part_check_clock(self, n: int, L: int) -> HamExpr:
+    def gen_H_l_sum_part_check_clock(self, n: int, L: int) -> HamExpr:
+        """Partial sum of H_l, at the middle of page 11.
+        Adding energy to each forward and backward clock state.
+
+        Args:
+            n (int): number of computational qubits.
+            L (int): number of gates.
+
+        Returns:
+            HamExpr: Hamlitonian that checks the propagation of the clock part.
+        """
         # when l = 1 or L (boundary cases)
         check_clock = [
             KronDiagonal(  # Eq 6: I ⨂ |00><00|_{1,2}^c
@@ -156,7 +169,18 @@ class ClockFrontend(Frontend):
 
         return KronDiagonal(Identity(n), Summation(check_clock))
 
-    def _gen_H_l_sum_part_unitary(self, L: int, Us: list[sp.spmatrix]) -> HamExpr:
+    def gen_H_l_sum_part_unitary(self, L: int, Us: list[sp.spmatrix]) -> HamExpr:
+        """Partial sum of H_l, at the middle of page 11.
+        Reducing energy of each associated clock state with the unitaries.
+
+        Args:
+            n (int): number of computational qubits.
+            L (int): number of gates.
+            Us (list[sp.spmatrix]): List of unitaries.
+
+        Returns:
+            HamExpr: Hamlitonian that checks that the propagation of the unitaries.
+        """
         Us = [None] + Us  # For 1-indexing as in theorem
 
         encoded_unitaries = []
@@ -174,69 +198,30 @@ class ClockFrontend(Frontend):
             for l in range(2, L):
                 encoded_unitaries.append(EncodeUnitary(Us[l], l - 1, L, "100", "110"))
 
-        return Summation(encoded_unitaries)
+        return ScalarMultiply(-1, Summation(encoded_unitaries))
 
-    def _gen_H_l_sum(self, n: int, L: int, Us: list[sp.spmatrix]) -> HamExpr:
-        """middle of page 11, https://arxiv.org/pdf/quant-ph/0405098.pdf
-
-        Case l = 1:
-              I ⨂ |00><00|_{1,2}^c
-            - U_1 ⨂ |10><00|_{1, 2}^c
-            - U_1^\dagger ⨂ |00><10|_{1, 2}^c
-            + I ⨂ |10><10|_{1,2}^c
-
-        Case 1 < l < L:
-              I ⨂ |100><100|_{l-1,l,l+1}^c              (clock at beginning is valid)
-            - U_l ⨂ |110><100|_{l-1,l,l+1}^c            (forward propagation is correct)
-            - U_l^\dagger ⨂ |100><110|_{l-1,l,l+1}^c    (backward propagation is correct)
-            + I ⨂ |110><110|_{l-1,l,l+1}^c              (clock at end is valid)
-
-        Case l = L:
-              I ⨂ |10><10|_{L-1,L}^c
-            - U_L ⨂ |11><10|_{L-1, L}^c
-            - U_L^\dagger ⨂ |10><11|_{L-1, L}^c
-            + I ⨂ |11><11|_{L-1,L}^c
+    def gen_H_l_sum(self, n: int, L: int, Us: list[sp.spmatrix]) -> HamExpr:
+        """Sum of H_l, at the middle of page 11.
+        Encoding unitary to corresponding clock state.
 
         Args:
             n (int): number of computational qubits.
             L (int): number of gates.
-            Us (list[sp.spmatrix]): Unitaries.
+            Us (list[sp.spmatrix]): List of unitaries.
 
         Returns:
-            HamExpr: Hamlitonian that checks that the propagation of the unitaries is executed correctly.
+            HamExpr: Hamlitonian that checks that the propagation of the unitaries.
         """
         # 1. Check the front and back clock propogated
-        check_clock = self._gen_H_l_sum_part_check_clock(n, L)
+        check_clock = self.gen_H_l_sum_part_check_clock(n, L)
 
         # 2. Encode unitary with the clock propagation
-        encoded_unitaries = self._gen_H_l_sum_part_unitary(L, Us)
+        encoded_unitaries = self.gen_H_l_sum_part_unitary(L, Us)
 
         # 3. Put everything together
-        #   H_l_sum = 0.5 ((Sum_{l=1}^L Clock) - (Sum_{l=1}^L Propagation))
-        return ScalarMultiply(
-            0.5,
-            Summation(
-                [
-                    check_clock,
-                    ScalarMultiply(-1, encoded_unitaries),
-                ]
-            ),
-        )
+        return ScalarMultiply(0.5, Summation([check_clock, encoded_unitaries]))
 
-    def unitaries_to_program(self, Us: list[sp.spmatrix]):
-        """Translate a list of unitaries into an adiabatic program.
-        https://arxiv.org/pdf/quant-ph/0405098.pdf
-
-        H_init   =  H_clockinit + H_input + H_clock
-        H_final  =  H_propagate + H_input + H_clock
-
-        Args:
-            Us (list[sp.spmatrix]): A list of unitaries encoded as sp.sparse matrices.
-
-        Returns:
-            AdiabaticProgram: An adiabatic program containing an initial Hamiltonian
-                and final Hamiltonian.
-        """
+    def unitaries_to_program(self, Us: list[sp.spmatrix]) -> ClockAdiabaticProgram:
         if len(Us) < 2:
             raise ValueError(
                 f"Obtained unitary of length {len(Us)} when we require list of unitaries to be larger than 2 ..."
@@ -248,19 +233,19 @@ class ClockFrontend(Frontend):
 
         # 1. Compute H to check that the clock is well-formed.
         #    This is constant for H_init and H_final.
-        H_clock = self._gen_H_clock(n, L)
+        H_clock = self.gen_H_clock(n, L)
 
         # 2. Compute H to check input.
         #    This is constant for H_init and H_final.
-        H_input = self._gen_H_input(n, L)
+        H_input = self.gen_H_input(n, L)
 
         # 3. Compute H to check clock initialization.
         #    This is exclusive for H_init.
-        H_clockinit = self._gen_H_clockinit(n, L)
+        H_clockinit = self.gen_H_clockinit(n, L)
 
         # 4. Compute H for step propagation.
         #    This is exclusive for H_final.
-        H_l_sum = self._gen_H_l_sum(n, L, Us)
+        H_l_sum = self.gen_H_l_sum(n, L, Us)
 
         # H_constant = Summation([H_input, KronDiagonal(Identity(n), H_clock)])
         H_constant = Summation([H_input, H_clock])

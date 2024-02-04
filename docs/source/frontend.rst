@@ -21,7 +21,7 @@ Implemented frontends
 -------------------------------------------
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    frontend/clock
    frontend/planar_clock

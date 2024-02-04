@@ -11,7 +11,7 @@ from language.planar_hamiltonian import *
 class PlanarAdiabaticProgram(AdiabaticProgram):
     def __init__(
         self,
-        num_state: int,
+        num_data: int,
         num_round: int,
         num_clock: int,
         H_init: PlanarHamExpr,
@@ -20,22 +20,22 @@ class PlanarAdiabaticProgram(AdiabaticProgram):
         time_steps: int,
     ):
         super.__init__(
-            H_init, H_final, total_time, time_steps, num_state * (num_round + 1) * 3
+            H_init, H_final, total_time, time_steps, num_data * (num_round + 1) * 3
         )
-        self.num_state = num_state
+        self.num_data = num_data
         self.num_round = num_round
         self.num_clock = num_clock
 
     def compile(self):
         return (
-            reify3(self.num_state, self.num_round, self.H_init),
-            reify3(self.num_state, self.num_round, self.H_final),
+            reify3(self.num_data, self.num_round, self.H_init),
+            reify3(self.num_data, self.num_round, self.H_final),
         )
 
 
 class PlanarClockFrontend(Frontend):
     """Implement 2D clock translation following:
-    https://epubs.siam.org/doi/abs/10.1137/S0097539705447323
+    https://arxiv.org/abs/quant-ph/0405098.
 
     Example:
 

@@ -45,7 +45,7 @@ def _transpile_two(qc: QuantumCircuit) -> QuantumCircuit:
 class AdiabaticInterpreter(Interpreter):
     """
     The interpreter built based on Section 3  (5-local) and Section 4 (3-local)
-    from this paper: https://epubs.siam.org/doi/abs/10.1137/S0097539705447323,
+    from this paper: https://arxiv.org/abs/quant-ph/0405098,
     integrated with muiltiple options and optimizations when intialized.
 
 
@@ -119,7 +119,7 @@ class AdiabaticInterpreter(Interpreter):
             [sp.csc_matrix(Operator(x)) for x in gates]
         )
 
-        n = adiabatic_program.num_state
+        n = adiabatic_program.num_data
         L = adiabatic_program.num_clock
 
         res = CPUBackend().run(adiabatic_program, num_shots=num_shots)

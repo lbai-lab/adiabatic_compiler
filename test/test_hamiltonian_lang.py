@@ -1,6 +1,6 @@
 from test import *
 
-from language.hamiltonian_lang import *
+from language.hamiltonian import *
 
 n = 4
 exp2_n = 2**n

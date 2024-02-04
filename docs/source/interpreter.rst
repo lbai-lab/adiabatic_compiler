@@ -14,7 +14,7 @@ Implemented interpreters
 ------------------------
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    interpreter/gate
    interpreter/adiabatic
