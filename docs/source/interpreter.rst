@@ -13,6 +13,8 @@ Abstract parent class
 Implemented interpreters
 ------------------------
 
+Each interpreter is placed in the individual file.
+
 .. automodule:: interpreter.gate
    :members:
    :undoc-members:
