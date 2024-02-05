@@ -208,7 +208,7 @@ def compile_expr(expr: HamExpr) -> sp.spmatrix:
         return sp.eye(2**expr.n)
     elif isinstance(expr, ProjectState):
         size = 2 ** len(expr.state)
-        zeros = sp.lil_matrix((size, size))
+        zeros = sp.csc_matrix((size, size))
         idx = int(expr.state, 2)
         zeros[idx, idx] = 1
         return zeros
@@ -220,7 +220,7 @@ def compile_expr(expr: HamExpr) -> sp.spmatrix:
         return expr.scalar * compile_expr(expr.expr)
     elif isinstance(expr, EncodeUnitary):
         size = 2 ** len(expr.state_bwd)
-        zeros = sp.lil_matrix((size, size))
+        zeros = sp.csc_matrix((size, size))
         zeros[int(expr.state_fwd, 2), int(expr.state_bwd, 2)] = 1
         res = sp.kron(sp.kron(expr.U, sp.eye(2**expr.front_i)), zeros)
         return sp.kron(res + res.conj().transpose(), sp.eye(2**expr.back_i))

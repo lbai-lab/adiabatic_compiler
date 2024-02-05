@@ -51,26 +51,26 @@ class AdiabaticInterpreter(Interpreter):
 
     Args:
         locality (Literal["5", "3"], optional): 5- or 3-local translation. Defaults to "5".
-        compress (Compress, optional): Option to compress the input circuit. Defaults to Compress.no.
-        end_i (int, optional): Number of identities added to the end of input circuit. Defaults to 0.
         transpile_to_two (bool, optional): Transpile the input circuit to contain only 2-qubit gates. Defaults to False.
         info (bool, optional): Print all information. Defaults to True.
+        end_i (int, optional): Number of identities added to the end of input circuit. Defaults to 0.
+        compress (Compress, optional): Option to compress the input circuit. Defaults to Compress.no.
     """
 
     def __init__(
         self,
         locality: Literal["5", "3"] = "5",
-        compress: Compress = Compress.no,
-        end_i=0,
         transpile_to_two=False,
         info=True,
+        end_i=0,
+        compress: Compress = Compress.no,
     ):
         super().__init__()
         self.locality = locality  # k-local Hamiltonian
-        self.compress = compress  # compress options
-        self.end_i = end_i  # end with identity?
         self.transpile_to_two = transpile_to_two  # transpile first?
         self.info = info  # should we print?
+        self.end_i = end_i  # end with identity?
+        self.compress = compress  # compress options
 
     def run(self, qc: QuantumCircuit, num_shots=1024, all_histories=False) -> dict:
         """Convert and run the circuit.

@@ -16,7 +16,7 @@ def project_state(ket: str, bra: str, start: int, bound: int) -> sp.spmatrix:
     assert end <= bound, "'len(ket/bra) + start' exceeds the ending bound"
 
     size = 2 ** len(ket)
-    ket_bra = sp.lil_matrix((size, size))
+    ket_bra = sp.csc_matrix((size, size))
     ket_bra[int(ket, 2), int(bra, 2)] = 1
 
     return sp.kron(
@@ -38,7 +38,7 @@ class TestHamiltonianLanguage(unittest.TestCase):
     def test_ProjectState(self):
         for i in range(exp2_n):
             state = bin(i)[2:].zfill(n)
-            zeros = sp.lil_matrix((exp2_n, exp2_n))
+            zeros = sp.csc_matrix((exp2_n, exp2_n))
             zeros[i, i] = 1
 
             assert_sp_matrix_equal(compile_expr(ProjectState(state)), zeros)

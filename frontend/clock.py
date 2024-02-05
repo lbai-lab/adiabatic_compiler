@@ -24,7 +24,7 @@ class ClockAdiabaticProgram(AdiabaticProgram):
         total_time: float,
         time_steps: int,
     ):
-        super.__init__(H_init, H_final, total_time, time_steps, num_data + num_clock)
+        super().__init__(H_init, H_final, total_time, time_steps, num_data + num_clock)
         self.num_data = num_data
         self.num_clock = num_clock
 

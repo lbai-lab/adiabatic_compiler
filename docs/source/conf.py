@@ -6,10 +6,6 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-# command line procedures
-# 1. sphinx-apidoc -o docs/source/generated ac
-# 2. sphinx-build -b html docs/source/ docs/build/html
-
 import os
 import sys
 
@@ -25,7 +21,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
     "sphinx.ext.intersphinx",
-    # "nbsphinx",
+    "nbsphinx",
 ]
 # -- Options for HTML output
 html_theme = "sphinx_rtd_theme"

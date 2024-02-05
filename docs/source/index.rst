@@ -6,9 +6,20 @@
 Welcome to Adiabatic Compiler's documentation!
 ==============================================
 
+Tutorials
+---------
+
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+
+   tutorial/quick_start
+
+
+Modules
+-------
+
+.. toctree::
+   :maxdepth: 2
 
    interpreter
    frontend
@@ -16,7 +27,7 @@ Welcome to Adiabatic Compiler's documentation!
    language
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`

@@ -15,7 +15,7 @@ class TestClockFrontend(unittest.TestCase):
         )
 
     def test_H_clock(self):
-        clock = sp.lil_matrix((exp2_n, exp2_n))
+        clock = sp.csc_matrix((exp2_n, exp2_n))
         for l in range(1, L):
             clock += project_state("01", "01", l, L)
         H_clock = sp.kron(sp.eye(exp2_n), clock)
@@ -33,7 +33,7 @@ class TestClockFrontend(unittest.TestCase):
         )
 
     def test_H_input(self):
-        compu = sp.lil_matrix((exp2_n, exp2_n))
+        compu = sp.csc_matrix((exp2_n, exp2_n))
         for i in range(1, n + 1):
             compu += project_state("1", "1", i, n)
         H_input = sp.kron(compu, project_state("0", "0", 1, L))
@@ -96,7 +96,7 @@ class TestClockFrontend(unittest.TestCase):
         ]
         new_n, new_L = 2, 3
         exp2_all = 2 ** (new_n + new_L)
-        encoded_unitaries = sp.lil_matrix((exp2_all, exp2_all))
+        encoded_unitaries = sp.csc_matrix((exp2_all, exp2_all))
 
         gates = [None] + gates
         encoded_unitaries += self.encode_unitary(gates[1], "00", "10", 1, new_L)
@@ -115,7 +115,7 @@ class TestClockFrontend(unittest.TestCase):
         )
 
         gates = [None] + gates
-        encoded_unitaries = sp.lil_matrix((exp2_all, exp2_all))
+        encoded_unitaries = sp.csc_matrix((exp2_all, exp2_all))
         for l in range(1, new_L + 1):
             encoded_unitaries += self.encode_unitary(gates[l], "0", "1", l, new_L)
 
