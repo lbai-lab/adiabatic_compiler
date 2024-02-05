@@ -17,12 +17,26 @@ Real-valued diagonal matrices
 
 
 class HamExpr(ExpressionBase):
-    """Hermitian"""
+    """
+    The base expression for this language.
+    The matrix represented by this category of expression is always Hermetian.
+    """
 
     pass
 
 
 class EncodeUnitary(HamExpr):
+    """
+    Encode a unitary as a hamiltonian with forward and backward state.
+
+    Args:
+        U (sp.spmatrix): Unitary.
+        start (int): start position (1-indexing).
+        bound (int): number of clock qubits, which is L.
+        state_bwd (str): backward clock.
+        state_fwd (str): forward clock.
+    """
+
     def __init__(
         self,
         U: sp.spmatrix,
@@ -31,19 +45,6 @@ class EncodeUnitary(HamExpr):
         state_bwd: str,
         state_fwd: str,
     ) -> None:
-        """Encode a unitary as a hamiltonian.
-
-        U(start, bound, state_bwd, state_fwd) =
-            U_l ⨂ |state_fwd><state_bwd|_{start, start+len(state)}^c
-            + U_l^\dagger ⨂ |state_bwd><state_fwd|_{start, start+len(state)}^c
-
-        Args:
-            U (sp.spmatrix): Unitary.
-            start (int): start position (1-indexing).
-            bound (int): number of clock qubits, which is L.
-            state_bwd (str): backward clock.
-            state_fwd (str): forward clock.
-        """
         assert isinstance(U, sp.spmatrix)
         assert isinstance(start, int)
         assert isinstance(bound, int)
@@ -64,15 +65,15 @@ class EncodeUnitary(HamExpr):
 
 
 class ScalarMultiply(HamExpr):
+    """
+    Scalar multiple of a Hamiltonian.
+
+    Args:
+        scalar (int | float): Scalar value.
+        expr (HamExpr): Hamiltonian.
+    """
+
     def __init__(self, scalar: int | float, expr: HamExpr) -> None:
-        """Scalar multiple of a Hamiltonian.
-
-        c * H
-
-        Args:
-            scalar (int | float): Scalar value.
-            expr (HamExpr): Hamiltonian.
-        """
         assert isinstance(scalar, (int, float))
         assert isinstance(expr, HamExpr)
 
@@ -84,14 +85,14 @@ class ScalarMultiply(HamExpr):
 
 
 class Summation(HamExpr):
+    """
+    Sum of Hamiltonians.
+
+    Args:
+        expr_arr (list[HamExpr]): Hamiltonians to sum up.
+    """
+
     def __init__(self, expr_arr: list[HamExpr]) -> None:
-        """Sum of Hamiltonians.
-
-        Σ H
-
-        Args:
-            expr_arr (list[HamExpr]): Hamiltonians to sum.
-        """
         assert len(expr_arr) > 0
         assert all(isinstance(x, HamExpr) for x in expr_arr)
 
@@ -107,63 +108,13 @@ class Summation(HamExpr):
 
 
 class Diagonal(HamExpr):
-    """Real-Valued Diagonal."""
-
-    pass
-
-
-class Identity(Diagonal):
-    def __init__(self, n: int) -> None:
-        """Identity matrix over n qubits.
-
-        I^{⨂n}
-
-        Args:
-            n (int): number of qubits.
-        """
-        assert isinstance(n, int)
-
-        self.n = n
-
-    def __str__(self) -> str:
-        return f"I({self.n})"
-
-
-class ProjectState(Diagonal):
-    def __init__(self, state: str) -> None:
-        """Project Operator.
-
-        |state><state|
-
-        Args:
-            state (str): state to project onto.
-        """
-        assert isinstance(state, str)
-
-        self.state = state
-
-    def __str__(self) -> str:
-        return f"(|{self.state}><{self.state}|)"
-
-
-class KronDiagonal(Diagonal):
-    def __init__(self, D1: Diagonal, D2: Diagonal) -> None:
-        """Kronocker product of 2 real-valued diagonal matrices.
-
-        D1 ⨂ D2
-
-        Args:
-            D1 (Diagonal): First real-valued diagonal matrix.
-            D2 (Diagonal): Second real-valued diagonal matrix.
-        """
-        assert KronDiagonal._is_diag(D1)
-        assert KronDiagonal._is_diag(D2)
-
-        self.D1 = D1
-        self.D2 = D2
+    """
+    Real-Valued Diagonal.
+    """
 
     def _is_diag(expr: HamExpr) -> bool:
-        """Check to see if the input Hamiltonian expression is diagonal.
+        """
+        Check to see if the input Hamiltonian expression is diagonal.
 
         Args:
             expr (HamExpr): Hamiltonian expression.
@@ -183,6 +134,57 @@ class KronDiagonal(Diagonal):
         else:
             return False
 
+
+class Identity(Diagonal):
+    """
+    Identity matrix over n qubits.
+
+    Args:
+        n (int): number of qubits.
+    """
+
+    def __init__(self, n: int) -> None:
+        assert isinstance(n, int)
+
+        self.n = n
+
+    def __str__(self) -> str:
+        return f"I({self.n})"
+
+
+class ProjectState(Diagonal):
+    """
+    Project a state to form as a Hamiltonian.
+
+    Args:
+        state (str): state to project onto.
+    """
+
+    def __init__(self, state: str) -> None:
+        assert isinstance(state, str)
+
+        self.state = state
+
+    def __str__(self) -> str:
+        return f"(|{self.state}><{self.state}|)"
+
+
+class KronDiagonal(Diagonal):
+    """
+    Kronocker product of 2 real-valued diagonal matrices.
+
+    Args:
+        D1 (Diagonal): First real-valued diagonal matrix.
+        D2 (Diagonal): Second real-valued diagonal matrix.
+    """
+
+    def __init__(self, D1: Diagonal, D2: Diagonal) -> None:
+        assert Diagonal._is_diag(D1)
+        assert Diagonal._is_diag(D2)
+
+        self.D1 = D1
+        self.D2 = D2
+
     def __str__(self) -> str:
         return f"({str(self.D1)} ⨂ {str(self.D2)})"
 
@@ -193,7 +195,8 @@ class KronDiagonal(Diagonal):
 
 
 def compile_expr(expr: HamExpr) -> sp.spmatrix:
-    """Convert a Hamiltonian expression into a Scipy matrix for numeric simulation.
+    """
+    Compute the Hamiltonian expression into a scipy matrix.
 
     Args:
         expr (HamExpr): Expression to lower.

@@ -1,12 +1,19 @@
 language module
 ========================
 
+Module contents (__init___.py)
+------------------------------
+
+.. automodule:: language
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Implemented languages
+---------------------
+
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
-   language.hamiltonian
-
-.. toctree::
-   :maxdepth: 1
-
-   language.planar_hamiltonian
+   language/hamiltonian
+   language/planar_hamiltonian

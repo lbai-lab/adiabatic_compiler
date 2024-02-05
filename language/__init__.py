@@ -2,6 +2,6 @@ import scipy.sparse as sp
 
 
 class ExpressionBase:
-    """The base parent class for expressions used in the language"""
+    """The base class for expressions used in all languagess"""
 
     pass

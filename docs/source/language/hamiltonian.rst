@@ -1,5 +1,5 @@
-language.hamiltonian
-========================
+language.hamiltonian package
+============================
 
 .. automodule:: language.hamiltonian
    :members:
