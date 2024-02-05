@@ -1,19 +1,18 @@
 backend module
-===============
+==============
 
-Module contents
----------------
+Module contents (__init__.py)
+-----------------------------
 
 .. automodule:: backend
    :members:
    :undoc-members:
    :show-inheritance:
 
-Submodules
-----------
+Implemented backends
+--------------------
 
-backend.cpu module
-------------------
+Currently only the CPU backend is avaliable, which is running naturally through qiskit.
 
 .. automodule:: backend.cpu
    :members:

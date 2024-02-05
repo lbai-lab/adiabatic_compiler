@@ -1,18 +1,12 @@
-import scipy.sparse as sp
-from backend import *
 from qiskit import QuantumCircuit
 from qiskit_aer import AerSimulator
 from tqdm import tqdm
 
-from frontend import *
+from backend import *
 
 
 class CPUBackend(Backend):
-    def run(
-        self,
-        adiabatic_program: AdiabaticProgram,
-        num_shots=1024,
-    ) -> dict:
+    def run(self, adiabatic_program: AdiabaticProgram, num_shots: int) -> dict:
         H_init, H_final = adiabatic_program.compile()
         duration = adiabatic_program.total_time / adiabatic_program.time_steps
         H_of_s = lambda s: sp.linalg.expm(

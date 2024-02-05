@@ -1,8 +1,8 @@
 frontend.compress module
 =========================
 
-Module contents
----------------
+Module contents (__init__.py)
+-----------------------------
 
 .. automodule:: frontend.compress
    :members:
