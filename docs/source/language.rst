@@ -16,4 +16,4 @@ Implemented languages
    :maxdepth: 2
 
    language/hamiltonian
-   .. language/planar_hamiltonian
+   language/planar_hamiltonian

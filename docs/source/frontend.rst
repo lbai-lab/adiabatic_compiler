@@ -24,4 +24,4 @@ Implemented frontends
    :maxdepth: 3
 
    frontend/clock
-   .. frontend/planar_clock
+   frontend/planar_clock
