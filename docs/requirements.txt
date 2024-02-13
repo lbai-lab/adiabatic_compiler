@@ -4,3 +4,4 @@ nbsphinx==0.9.3
 scipy==1.11.3
 qiskit==0.45.2
 qiskit-aer==0.13.2
+tqdm==4.66.1
