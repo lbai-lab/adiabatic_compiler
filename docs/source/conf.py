@@ -9,7 +9,7 @@
 import os
 import sys
 
-sys.path.append(os.path.abspath("../../ac"))
+sys.path.append(os.path.abspath("../.."))
 
 project = "Adiabatic Compiler"
 copyright = "2024, Haoyuan Tan & Daniel Huang"
