@@ -5,7 +5,7 @@
 Tested with Python 3.10
 ```
 pip install -r requirements.txt
-pip install -e .
+pip install -e src
 ```
 
 ## Running tests
