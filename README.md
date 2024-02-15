@@ -9,7 +9,6 @@ pip install -e .
 ```
 
 ## Running tests
-Run this line in the terminal
 ```
 python -m unittest discover test -v -f
 ```
