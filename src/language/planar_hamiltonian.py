@@ -7,14 +7,14 @@ from itertools import product
 # ==============================================================================
 
 START = "START"  # empty
-FIRST0 = "FIRST0"  # arrow up
-FIRST1 = "FIRST1"  # arrow down
-SECOND0 = "SECOND0"  # two arrows up
-SECOND1 = "SECOND1"  # two arrows down
+SINGLE_UP = "SINGLE_UP"  # arrow up
+SINGLE_DOWN = "SINGLE_DOWN"  # arrow down
+DOUBLE_UP = "DOUBLE_UP"  # two arrows up
+DOUBLE_DOWN = "DOUBLE_DOWN"  # two arrows down
 END = "END"  # cross
 
-SPAN_FIRST = [FIRST0, FIRST1]
-SPAN_SECOND = [SECOND0, SECOND1]
+SPAN_FIRST = [SINGLE_UP, SINGLE_DOWN]
+SPAN_SECOND = [DOUBLE_UP, DOUBLE_DOWN]
 
 
 # ==============================================================================
@@ -230,13 +230,13 @@ def encode3(s: str) -> str:
         return "000"
     elif s is END:
         return "001"
-    elif s is FIRST0:
+    elif s is SINGLE_UP:
         return "010"
-    elif s is FIRST1:
+    elif s is SINGLE_DOWN:
         return "011"
-    elif s is SECOND0:
+    elif s is DOUBLE_UP:
         return "100"
-    elif s is SECOND1:
+    elif s is DOUBLE_DOWN:
         return "101"
     else:
         raise ValueError(f"{s} not supported ...")
@@ -340,6 +340,7 @@ def reify3(n: int, R: int, H: PlanarHamExpr):
                     for i1, i2 in enumerate(_SPAN_1_FIRST):
                         for j1, j2 in enumerate(_SPAN_1_SECOND):
                             X[i2, j2] = U[i1, j1]
+                    # print(X.A.real)
                     X += X.conj().transpose()
                     my_H += H.scalar * kron_I(X, start_idx, num_qubits - start_idx - 3)
 
@@ -349,6 +350,7 @@ def reify3(n: int, R: int, H: PlanarHamExpr):
                         for j1, j2 in enumerate(_SPAN_2_SECOND):
                             X[i2, j2] = U[i1, j1]
                     X += X.conj().transpose()
+                    print(X)
                     my_H += H.scalar * kron_I(X, start_idx, num_qubits - start_idx - 6)
 
                 else:

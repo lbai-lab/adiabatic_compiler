@@ -29,10 +29,11 @@ class PlanarClockInterpreter(Interpreter):
         # currently use an example circuit of the bell state
         gates = []
         qc = QuantumCircuit(1)
-        qc.h(0)
+        qc.x(0)
         gates.append(Operator(qc))
         qc = QuantumCircuit(2)
-        qc.cx(0, 1)
+        # qc.cx(0, 1)
+        qc.x(1)
         gates.append(Operator(qc))
         gates.append(Operator(QuantumCircuit(1)))
         gates.append(Operator(QuantumCircuit(1)))

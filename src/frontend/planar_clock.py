@@ -50,7 +50,7 @@ class PlanarClockFrontend(Frontend):
         super().__init__()
 
     def _gen_H_input(self, n: int, R: int, L: int) -> PlanarHamExpr:
-        """Check that input is not FIRST1.
+        """Check that input is not SINGLE_DOWN.
 
         --------------
         | (r=1, c=0) |  (r=1, c=1)  (r=1, c=2)
@@ -68,7 +68,7 @@ class PlanarClockFrontend(Frontend):
         Returns:
             PlanarHamExpr: Hamiltonian.
         """
-        return ScalarSum([SingProj(FIRST1, row=i, col=0) for i in range(1, n + 1)])
+        return ScalarSum([SingProj(SINGLE_DOWN, row=i, col=0) for i in range(1, n + 1)])
 
     def _gen_H_clockinit(self, n: int, R: int, L: int) -> PlanarHamExpr:
         """Check that clock is initialized correctly.
@@ -92,8 +92,8 @@ class PlanarClockFrontend(Frontend):
                 Identity(row=1, col=0),
                 ScalarSum(
                     [
-                        SingProj(FIRST0, row=1, col=0),
-                        SingProj(FIRST1, row=1, col=0),
+                        SingProj(SINGLE_UP, row=1, col=0),
+                        SingProj(SINGLE_DOWN, row=1, col=0),
                     ],
                     scalar=-1,
                 ),
@@ -243,10 +243,10 @@ class PlanarClockFrontend(Frontend):
                         arr_pos.append(VertProj(START, x, row=i, col=r + 1))
 
                 arr_neg.append(
-                    HoriSymProject([SECOND0, START], [END, FIRST0], row=i, col=r)
+                    HoriSymProject([DOUBLE_UP, START], [END, SINGLE_UP], row=i, col=r)
                 )
                 arr_neg.append(
-                    HoriSymProject([SECOND1, START], [END, FIRST1], row=i, col=r)
+                    HoriSymProject([DOUBLE_DOWN, START], [END, SINGLE_DOWN], row=i, col=r)
                 )
 
         return ScalarSum(
