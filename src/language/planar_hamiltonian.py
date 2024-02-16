@@ -28,7 +28,6 @@ class PlanarHamExpr(ExpressionBase):
     Example:
 
     R = 2, C = 2 has a grid layout of R x (C + 1)
-        (r=0, c=0)  (r=0, c=1)  (r=0, c=2)
         (r=1, c=0)  (r=1, c=1)  (r=1, c=2)
         (r=2, c=0)  (r=2, c=1)  (r=2, c=2)
     """
@@ -47,12 +46,11 @@ class Identity(PlanarHamExpr):
     I
     """
 
-    def __init__(self, n: int, row: int, col: int) -> None:
+    def __init__(self, row: int, col: int) -> None:
         super().__init__(row=row, col=col)
-        self.n = n
 
     def __str__(self):
-        return f"I({self.n})_({self.row}, {self.col})"
+        return f"I({self.row}, {self.col})"
 
 
 """
@@ -166,33 +164,25 @@ class ScalarSum(PlanarHamExpr):
 
 
 class Grid:
-    def __init__(self, rows: int, cols: int, H: PlanarHamExpr) -> None:
-        self.rows = rows
-        self.cols = cols
-        self.H = H
+    def __init__(self, n: int, R: int, H: PlanarHamExpr) -> None:
         self.grid: dict[tuple[int, int], list[PlanarHamExpr]] = {}
-        self._gridify()
-
-    # NOTE:
-    # the rows were in 1-index form following the paper
-    # but the columns are not, because col_0 is used as input
-    def _gridify(self):
-        for r in range(self.rows):
-            for c in range(0, self.cols + 1):
+        for r in range(n):
+            for c in range(R + 1):
                 self.grid[r, c] = []
 
-        def go(H: PlanarHamExpr, scalar=1):
-            if isinstance(H, PlanarHamExpr):
-                H.scalar *= scalar
-                if isinstance(H, ScalarSum):
-                    for H2 in H.Hs:
-                        go(H2, H.scalar)
-                else:
-                    self.grid[H.row - 1, H.col].append(H)
-            else:
-                raise ValueError(f"Unexpected type {type(H)}")
+        self._gridify(H)
 
-        go(self.H, 1)
+    # NOTE: the paper define n as 1-index, but R as 0-index
+    def _gridify(self, H: PlanarHamExpr, scalar=1):
+        if isinstance(H, PlanarHamExpr):
+            H.scalar *= scalar
+            if isinstance(H, ScalarSum):
+                for H2 in H.Hs:
+                    self._gridify(H2, H.scalar)
+            else:
+                self.grid[H.row - 1, H.col].append(H)
+        else:
+            raise ValueError(f"Unexpected type {type(H)}")
 
 
 """
@@ -226,7 +216,7 @@ q_4        q_10
 """
 
 
-def encode3(st: str) -> str:
+def encode3(s: str) -> str:
     """Particle to 3 qubits.
 
     Args:
@@ -235,20 +225,20 @@ def encode3(st: str) -> str:
     Returns:
         str: Encoding
     """
-    if st is START:
+    if s is START:
         return "000"
-    elif st is END:
+    elif s is END:
         return "001"
-    elif st is FIRST0:
+    elif s is FIRST0:
         return "010"
-    elif st is FIRST1:
+    elif s is FIRST1:
         return "011"
-    elif st is SECOND0:
+    elif s is SECOND0:
         return "100"
-    elif st is SECOND1:
+    elif s is SECOND1:
         return "101"
     else:
-        raise ValueError(f"{st} not supported ...")
+        raise ValueError(f"{s} not supported ...")
 
 
 _SPAN_1_FIRST = [int(encode3(x), 2) for x in SPAN_FIRST]
@@ -261,22 +251,17 @@ _SPAN_2_SECOND = [
 ]
 
 
-def get_particle(n: int, i: int, j: int):
-    q_0 = 3 * i + j * 3 * n
-    return q_0, q_0 + 1, q_0 + 2
-
-
 def bin_strs(n: int) -> list[str]:
     return ["".join(p) for p in product("01", repeat=n)]
 
 
-def kron_I(mat: sp.spmatrix, front: int, back: int):
+def kron_I(mat: sp.lil_matrix, front: int, back: int) -> sp.lil_matrix:
     assert front >= 0 and back >= 0, "Unexpected negative identity numbers"
     return sp.kron(sp.eye(2**front), sp.kron(mat, sp.eye(2**back)))
 
 
-def init_square_matrix(size: int) -> sp.csc_matrix:
-    return sp.csc_matrix((size, size)) * 1j
+def init_square_matrix(size: int) -> sp.lil_matrix:
+    return sp.lil_matrix((size, size)) * 1j
 
 
 # the entry of compile
@@ -284,23 +269,20 @@ def init_square_matrix(size: int) -> sp.csc_matrix:
 def reify3(n: int, R: int, H: PlanarHamExpr):
     num_particles = n * (R + 1)
     num_qubits = 3 * num_particles
-    size = 2**num_qubits
-    my_H = init_square_matrix(size)
 
+    hori_all_qubits = 3 * (n + 1)
+    hori_middle_qubits = 3 * (n - 1)
+
+    size = 2**num_qubits
+    size_hori_all = 2**hori_all_qubits
+
+    my_H = init_square_matrix(size)
     for pos, Hs in Grid(n, R, H).grid.items():
         if len(Hs) == 0:
             continue
 
-        k, r = pos
-        qs_k_r = get_particle(n, k, r)
-        start_idx = qs_k_r[0]
-        hori_all_qubits = 3 * (n + 1)
-        size_hori_all = 2**hori_all_qubits
-        hori_middle_qubits = 3 * (n - 1)
-
+        start_idx = 3 * (pos[0] + pos[1] * n)
         for H in Hs:
-            # TODO: check what Identity.n can do so far
-            # but probably just leave it alone
             if isinstance(H, Identity):
                 my_H += H.scalar * sp.eye(size)
 

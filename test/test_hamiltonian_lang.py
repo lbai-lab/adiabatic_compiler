@@ -29,12 +29,10 @@ def project_state(ket: str, bra: str, start: int, bound: int) -> sp.spmatrix:
 
 
 class TestHamiltonianLanguage(unittest.TestCase):
-    # unnecssary since this is a constant
     def test_Identity(self):
         for i in range(1, n + 1):
             assert_sp_matrix_equal(compile_expr(Identity(i)), sp.eye(2**i))
 
-    # unnecssary since this is a constant
     def test_ProjectState(self):
         for i in range(exp2_n):
             state = bin(i)[2:].zfill(n)

@@ -41,4 +41,4 @@ class PlanarClockInterpreter(Interpreter):
             [sp.csc_matrix(x) for x in gates]
         )
 
-        # return CPUBackend().run(program)
+        return CPUBackend().run(program, num_shots)

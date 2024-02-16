@@ -19,7 +19,7 @@ class PlanarAdiabaticProgram(AdiabaticProgram):
         total_time: float,
         time_steps: int,
     ):
-        super.__init__(
+        super().__init__(
             H_init, H_final, total_time, time_steps, num_data * (num_round + 1) * 3
         )
         self.num_data = num_data
@@ -89,7 +89,7 @@ class PlanarClockFrontend(Frontend):
         """
         return ScalarSum(
             [
-                Identity(1, row=1, col=0),
+                Identity(row=1, col=0),
                 ScalarSum(
                     [
                         SingProj(FIRST0, row=1, col=0),
@@ -277,8 +277,6 @@ class PlanarClockFrontend(Frontend):
         H_clockinit = self._gen_H_clockinit(n, R, L)
         H_clock = self._gen_H_clock(n, R, L)
         H_l_sum = self._gen_H_l_sum(n, R, L, Us)
-
-        print(reify3(n, R, ScalarSum([H_clockinit])))
 
         return PlanarAdiabaticProgram(
             n,
