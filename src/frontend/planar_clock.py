@@ -68,7 +68,7 @@ class PlanarClockFrontend(Frontend):
         Returns:
             PlanarHamExpr: Hamiltonian.
         """
-        return ScalarSum([SingProj(FIRST1, row=k, col=0) for k in range(1, n + 1)])
+        return ScalarSum([SingProj(FIRST1, row=i, col=0) for i in range(1, n + 1)])
 
     def _gen_H_clockinit(self, n: int, R: int, L: int) -> PlanarHamExpr:
         """Check that clock is initialized correctly.
@@ -147,13 +147,13 @@ class PlanarClockFrontend(Frontend):
             for r in range(R + 1):  # all columns
                 # RULE 5
                 # SECOND can't be below not-SECOND
-                for x in not_second:
-                    for y in SPAN_SECOND:
-                        rules.append(VertProj(x, y, row=k, col=r))
+                for x in SPAN_SECOND:
+                    for y in not_second:
+                        rules.append(VertProj(y, x, row=k, col=r))
                 # RULE 6
                 # FIRST can't be above not-FIRST
-                for x in not_first:
-                    for y in SPAN_FIRST:
+                for x in SPAN_FIRST:
+                    for y in not_first:
                         rules.append(VertProj(x, y, row=k, col=r))
                 # RULE 7
                 # START and END can't be adjacent

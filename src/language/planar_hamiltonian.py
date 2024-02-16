@@ -175,11 +175,12 @@ class Grid:
     # NOTE: the paper define n as 1-index, but R as 0-index
     def _gridify(self, H: PlanarHamExpr, scalar=1):
         if isinstance(H, PlanarHamExpr):
-            H.scalar *= scalar
             if isinstance(H, ScalarSum):
                 for H2 in H.Hs:
-                    self._gridify(H2, H.scalar)
+                    self._gridify(H2, scalar * H.scalar)
             else:
+                H.scalar *= scalar
+                print(H.scalar, "*", H)
                 self.grid[H.row - 1, H.col].append(H)
         else:
             raise ValueError(f"Unexpected type {type(H)}")
@@ -249,6 +250,11 @@ _SPAN_2_FIRST = [
 _SPAN_2_SECOND = [
     int(encode3(x) + encode3(y), 2) for x in SPAN_SECOND for y in SPAN_SECOND
 ]
+
+# print(_SPAN_1_FIRST)
+# print(_SPAN_1_SECOND)
+# print(_SPAN_2_FIRST)
+# print(_SPAN_2_SECOND)
 
 
 def bin_strs(n: int) -> list[str]:
@@ -336,6 +342,7 @@ def reify3(n: int, R: int, H: PlanarHamExpr):
                             X[i2, j2] = U[i1, j1]
                     X += X.conj().transpose()
                     my_H += H.scalar * kron_I(X, start_idx, num_qubits - start_idx - 3)
+
                 elif U.shape[0] == 4:
                     X = init_square_matrix(64)
                     for i1, i2 in enumerate(_SPAN_2_FIRST):
