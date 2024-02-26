@@ -6,19 +6,17 @@
 Welcome to Adiabatic Compiler's documentation!
 ==============================================
 
-Tutorials
----------
+.. toctree::
+   :maxdepth: 1
+   :caption: Tutorials
+
+   tutorial/installation
+   tutorial/quick_start
+
 
 .. toctree::
    :maxdepth: 2
-
-   quick_start
-
-Modules
--------
-
-.. toctree::
-   :maxdepth: 2
+   :caption: Modules
 
    interpreter
    frontend
