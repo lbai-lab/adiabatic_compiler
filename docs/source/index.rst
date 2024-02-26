@@ -18,10 +18,10 @@ Welcome to Adiabatic Compiler's documentation!
    :maxdepth: 2
    :caption: Modules
 
-   interpreter
-   frontend
-   backend
-   language
+   trees/interpreter
+   trees/frontend
+   trees/backend
+   trees/language
 
 Indices and tables
 ------------------
