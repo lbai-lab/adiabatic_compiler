@@ -18,7 +18,7 @@ Submodules
    frontend.compress
 
 Implemented frontends
--------------------------------------------
+---------------------
 
 .. toctree::
    :maxdepth: 3

@@ -10,11 +10,9 @@ Tutorials
 ---------
 
 .. toctree::
-   :maxdepth: 0
+   :maxdepth: 2
 
-   tutorial/installation
-   tutorial/quick_start
-
+   quick_start
 
 Modules
 -------
