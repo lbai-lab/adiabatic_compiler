@@ -5,6 +5,7 @@ from qiskit.quantum_info import Operator
 from frontend.compress import *
 from frontend.tensor import *
 from interpreter import Interpreter
+from backend.cpu import CPUBackend
 
 
 class TensorInterpreter(Interpreter):
@@ -15,6 +16,9 @@ class TensorInterpreter(Interpreter):
 
         # TODO: for n-qubit case, calculate the actual depth
         program = TensorFrontend().unitaries_to_program(unitaries, qc.num_qubits, len(unitaries))
+
+        for x,y in CPUBackend().run(program, 1024).items():
+            print(x, y)
 
 
 qc = QuantumCircuit(2)
