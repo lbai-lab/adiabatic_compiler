@@ -22,6 +22,6 @@ class TensorInterpreter(Interpreter):
 
 
 qc = QuantumCircuit(2)
-qc.x(1)
+qc.x(0)
 
 TensorInterpreter().run(qc)

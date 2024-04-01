@@ -83,18 +83,21 @@ class TensorFrontend(Frontend):
 
         h_us = []
         # TODO: for more Us
-        lamb_4 = self.lamb_n(4)
-        phi_U_project = sp.kron(sp.eye(4), Us[0]).dot(bell)
-        h_u = lamb_4.dot(
-            sp.eye(256) - sp.kron(sp.eye(4), sp.kron(phi_U_project, sp.eye(4)))
-        ).dot(lamb_4)
-        h_us.append(sp.kron(h_u, sp.eye(4)))
+        # lamb_4 = self.lamb_n(4)
+        # phi_U_project = sp.kron(sp.eye(4), Us[0]).dot(bell)
+        # h_u = lamb_4.dot(
+        #     sp.eye(256) - sp.kron(sp.eye(4), sp.kron(phi_U_project, sp.eye(4)))
+        # ).dot(lamb_4)
+        # h_us.append(sp.kron(h_u, sp.eye(4)))
 
         lamb_end = sp.kron(self.lamb_n(2), sp.eye(4))
-        h_end = lamb_end.dot(sp.eye(64) - sp.kron(sp.eye(4), sp.eye(16).dot(bell))).dot(
+        h_end = lamb_end.dot(sp.eye(64) - sp.kron(sp.eye(4), sp.kron(
+            sp.eye(4), Us[-1]
+        ).dot(bell))).dot(
             lamb_end
         )
-        h_us.append(sp.kron(sp.eye(16), h_end))
+        # h_us.append(sp.kron(sp.eye(16), h_end))
+        h_us.append(h_end)
 
         for h in h_us:
             print(h.shape)
@@ -108,11 +111,11 @@ class TensorFrontend(Frontend):
             raise ValueError(f"Require at least one unitary matrix")
         assert num_qubits == 2, "Currently only support 2-qubits circuit"
 
-        depth += 1
+        # depth += 1
 
         H_in = self.gen_H_in(num_qubits, depth)
         H_out = self.gen_H_out(num_qubits, depth)
         H_prop = self.gen_H_prop(num_qubits, depth, Us)
 
         total = num_qubits * (2 * depth + 1)
-        return TensorAdiabaticProgram(H_prop, H_prop, 2**total, total, total)
+        return TensorAdiabaticProgram(H_in, H_in+H_out+H_prop, 2**total, total, total)
