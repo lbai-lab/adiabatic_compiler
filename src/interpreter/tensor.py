@@ -15,13 +15,20 @@ class TensorInterpreter(Interpreter):
         unitaries = [sp.csc_matrix(Operator(x)) for x in gates]
 
         # TODO: for n-qubit case, calculate the actual depth
-        program = TensorFrontend().unitaries_to_program(unitaries, qc.num_qubits, len(unitaries))
+        n = qc.num_qubits
+        program = TensorFrontend().unitaries_to_program(unitaries, n, len(unitaries))
 
-        for x,y in CPUBackend().run(program, 1024).items():
-            print(x, y)
+        results = {}
+        for res, count in CPUBackend().run(program, 1024).items():
+            real_res = res[-n:]
+            results.setdefault(real_res, 0)
+            results[real_res] += count
+
+        print(results)
 
 
 qc = QuantumCircuit(2)
 qc.x(0)
+qc.x(1)
 
 TensorInterpreter().run(qc)
