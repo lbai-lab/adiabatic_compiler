@@ -1,45 +1,12 @@
 from typing import Literal
 
 import scipy.sparse as sp
-from qiskit import QuantumCircuit, transpile
+from qiskit import QuantumCircuit
 from qiskit.quantum_info import Operator
-from qiskit_aer import AerSimulator
 
 from backend.cpu import *
 from frontend.clock import *
-from interpreter import Interpreter
-
-# ==============================================================================
-# Helper
-# ==============================================================================
-
-
-def _transpile_two(qc: QuantumCircuit) -> QuantumCircuit:
-    """Convert a circuit to only use 2-input gates.
-
-    Args:
-        qc (QuantumCircuit): Input quantum circuit.
-
-    Returns:
-        QuantumCircuit: Quantum circuit that only uses 2-input gates.
-    """
-    # Create an empty circuit
-    qc_p = create_empty_circuit(qc)
-
-    # Transpile original circuit to use only 2-qubit gates
-    aer_sim = AerSimulator()
-    basis_gates = ["id", "u1", "u2", "u3", "cx", "cu1", "cu2", "cu3"]
-    qc_trans = transpile(qc, backend=aer_sim, basis_gates=basis_gates)
-
-    # Accumulate gates
-    for gate in qc_trans:
-        qc_p.append(gate)
-    return qc_p
-
-
-# ==============================================================================
-# Interpreter
-# ==============================================================================
+from interpreter import *
 
 
 class AdiabaticInterpreter(Interpreter):
@@ -78,7 +45,7 @@ class AdiabaticInterpreter(Interpreter):
         Args:
             qc (QuantumCircuit): Quantum circuit to run.
             num_shots (int, optional): Number of shots to run the circuit for. Defaults to 1024.
-            all_histories (bool, optional): Return unprocessed results with clock states. Defaults to False.
+            all_histories (bool, optional): Return uninterpreted results with clock states. Defaults to False.
 
         Returns:
             dict: Results after running the circuit.
@@ -87,7 +54,7 @@ class AdiabaticInterpreter(Interpreter):
 
         # 1. transpile to get "L 2-qubit gates" as stated in the theorem
         if self.transpile_to_two:
-            qc = _transpile_two(qc_orig)
+            qc = transpile_two(qc_orig)
 
         # 2. compress gates if prompted
         gates, qubit_map = compress_circuit(qc, self.compress)

@@ -9,15 +9,19 @@ from backend.cpu import CPUBackend
 
 
 class TensorInterpreter(Interpreter):
+    def __init__(self, eps: float = None) -> None:
+        self.eps = eps
 
-    def run(self, qc: QuantumCircuit, num_shots=10000) -> dict:
+    def run(self, qc: QuantumCircuit, num_shots=1024) -> dict:
         gates = compress_circuit(qc, Compress.parallel)[0]
         unitaries = [sp.csc_matrix(Operator(x)) for x in gates]
 
         # TODO: for n-qubit case, calculate the actual depth
         n = qc.num_qubits
         D = len(unitaries)
-        program = TensorFrontend().unitaries_to_program(unitaries, n, D)
+        if self.eps is None:
+            self.eps = (D + 1) ** (-0.51)
+        program = TensorFrontend(self.eps).unitaries_to_program(unitaries, n, D)
 
         results = {}
         valid_states = ["00", "11"]
@@ -30,16 +34,3 @@ class TensorInterpreter(Interpreter):
                 results[res[-n:]] += count
 
         return results
-
-
-qc = QuantumCircuit(2)
-qc.x([0])
-print(sorted(TensorInterpreter().run(qc).items()))
-
-qc = QuantumCircuit(2)
-qc.x([1])
-print(sorted(TensorInterpreter().run(qc).items()))
-
-qc = QuantumCircuit(2)
-qc.x([0, 1])
-print(sorted(TensorInterpreter().run(qc).items()))

@@ -35,7 +35,7 @@ class TensorFrontend(Frontend):
         @ __phi_I
     )
 
-    def __init__(self, eps: float = 2):
+    def __init__(self, eps):
         self.lamb = sp.csc_matrix(
             eps * self.project(self.__phi_I)
             + (
@@ -80,7 +80,7 @@ class TensorFrontend(Frontend):
 
     def encode_U(self, U: sp.spmatrix, is_boundary: bool) -> sp.csc_matrix:
         qc = QuantumCircuit(4)
-        qc.append(UnitaryGate(U.toarray()), [1, 3])
+        qc.append(UnitaryGate(U.toarray()), [1,3])
         encoded_U = sp.eye(16) - self.project(
             Operator(qc).data @ sp.kron(self.__phi_I, self.__phi_I)
         )

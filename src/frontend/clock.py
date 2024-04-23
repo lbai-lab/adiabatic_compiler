@@ -29,7 +29,10 @@ class ClockAdiabaticProgram(AdiabaticProgram):
         self.num_clock = num_clock
 
     def compile(self):
-        return compile_expr(self.H_init), compile_expr(self.H_final)
+        return (
+            sp.csc_matrix(compile_expr(self.H_init)),
+            sp.csc_matrix(compile_expr(self.H_final)),
+        )
 
 
 class ClockFrontend(Frontend):

@@ -180,7 +180,6 @@ class Grid:
                     self._gridify(H2, scalar * H.scalar)
             else:
                 H.scalar *= scalar
-                print(H.scalar, "*", H)
                 self.grid[H.row - 1, H.col].append(H)
         else:
             raise ValueError(f"Unexpected type {type(H)}")
@@ -250,12 +249,6 @@ _SPAN_2_FIRST = [
 _SPAN_2_SECOND = [
     int(encode3(x) + encode3(y), 2) for x in SPAN_SECOND for y in SPAN_SECOND
 ]
-
-# print(_SPAN_1_FIRST)
-# print(_SPAN_1_SECOND)
-# print(_SPAN_2_FIRST)
-# print(_SPAN_2_SECOND)
-
 
 def bin_strs(n: int) -> list[str]:
     return ["".join(p) for p in product("01", repeat=n)]
@@ -340,7 +333,6 @@ def reify3(n: int, R: int, H: PlanarHamExpr):
                     for i1, i2 in enumerate(_SPAN_1_FIRST):
                         for j1, j2 in enumerate(_SPAN_1_SECOND):
                             X[i2, j2] = U[i1, j1]
-                    # print(X.A.real)
                     X += X.conj().transpose()
                     my_H += H.scalar * kron_I(X, start_idx, num_qubits - start_idx - 3)
 
@@ -350,7 +342,6 @@ def reify3(n: int, R: int, H: PlanarHamExpr):
                         for j1, j2 in enumerate(_SPAN_2_SECOND):
                             X[i2, j2] = U[i1, j1]
                     X += X.conj().transpose()
-                    print(X)
                     my_H += H.scalar * kron_I(X, start_idx, num_qubits - start_idx - 6)
 
                 else:

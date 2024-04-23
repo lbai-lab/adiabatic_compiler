@@ -28,8 +28,8 @@ class PlanarAdiabaticProgram(AdiabaticProgram):
 
     def compile(self):
         return (
-            reify3(self.num_data, self.num_round, self.H_init),
-            reify3(self.num_data, self.num_round, self.H_final),
+            sp.csc_matrix(reify3(self.num_data, self.num_round, self.H_init)),
+            sp.csc_matrix(reify3(self.num_data, self.num_round, self.H_final)),
         )
 
 
@@ -246,7 +246,9 @@ class PlanarClockFrontend(Frontend):
                     HoriSymProject([DOUBLE_UP, START], [END, SINGLE_UP], row=i, col=r)
                 )
                 arr_neg.append(
-                    HoriSymProject([DOUBLE_DOWN, START], [END, SINGLE_DOWN], row=i, col=r)
+                    HoriSymProject(
+                        [DOUBLE_DOWN, START], [END, SINGLE_DOWN], row=i, col=r
+                    )
                 )
 
         return ScalarSum(
@@ -272,6 +274,7 @@ class PlanarClockFrontend(Frontend):
         n = int(np.log2(Us[1].shape[0]))
         R = L // (2 * n)
         print(f"n={n}, L={L}, R={R}")
+        print(f"total={3 * L}")
 
         H_input = self._gen_H_input(n, R, L)
         H_clockinit = self._gen_H_clockinit(n, R, L)
