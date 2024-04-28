@@ -1,7 +1,7 @@
-interpreter.planar package
+interpreter.tensor package
 ==========================
 
-.. automodule:: interpreter.planar
+.. automodule:: interpreter.tensor
    :members:
    :undoc-members:
    :show-inheritance:

@@ -1,7 +1,7 @@
-frontend.planar_clock package
+frontend.tensor package
 =============================
 
-.. automodule:: frontend.planar_clock
+.. automodule:: frontend.tensor
    :members:
    :undoc-members:
    :show-inheritance:

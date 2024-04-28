@@ -19,3 +19,4 @@ Implemented interpreters
    interpreter/gate
    interpreter/adiabatic
    interpreter/planar
+   interpreter/tensor

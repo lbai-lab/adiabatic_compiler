@@ -25,3 +25,4 @@ Implemented frontends
 
    frontend/clock
    frontend/planar_clock
+   frontend/tensor
