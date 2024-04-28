@@ -127,16 +127,20 @@ class TensorFrontend(Frontend):
         for x in ["0000", "1111", "0101", "1010"]:
             arr[int(x, 2)] = 0.5
 
-        encoded_U = self.project(
+        projected_U = self.project(
             sp.kron(sp.eye(4), U) @ sp.csc_matrix(arr).reshape(-1, 1)
         )
 
         if is_boundary:
             qc = QuantumCircuit(6)
-            qc.append(UnitaryGate(encoded_U.toarray(), check_input=False), [1, 3, 4, 5])
+            qc.append(
+                UnitaryGate(projected_U.toarray(), check_input=False), [1, 3, 4, 5]
+            )
         else:
             qc = QuantumCircuit(8)
-            qc.append(UnitaryGate(encoded_U.toarray(), check_input=False), [1, 3, 4, 6])
+            qc.append(
+                UnitaryGate(projected_U.toarray(), check_input=False), [1, 3, 4, 6]
+            )
 
         return sp.eye(2**qc.num_qubits) - sp.csc_matrix(Operator(qc))
 
