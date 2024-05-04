@@ -41,8 +41,8 @@ from tensor networks and fault tolerance,” 2023. <https://arxiv.org/abs/2309.1
 
    interpreter
    frontend
-   backend
    language
+   backend
 
 Indices and tables
 ------------------

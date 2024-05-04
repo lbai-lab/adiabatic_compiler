@@ -8,7 +8,7 @@ from language.planar_hamiltonian import *
 # they will be converted to 0 index in Grid class/method
 
 
-class PlanarAdiabaticProgram(AdiabaticProgram):
+class PlanarClockAdiabaticProgram(AdiabaticProgram):
     def __init__(
         self,
         num_data: int,
@@ -281,7 +281,7 @@ class PlanarClockFrontend(Frontend):
         H_clock = self._gen_H_clock(n, R, L)
         H_l_sum = self._gen_H_l_sum(n, R, L, Us)
 
-        return PlanarAdiabaticProgram(
+        return PlanarClockAdiabaticProgram(
             n,
             R,
             L,

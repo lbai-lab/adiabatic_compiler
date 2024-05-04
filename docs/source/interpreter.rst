@@ -17,6 +17,6 @@ Implemented interpreters
    :maxdepth: 3
 
    interpreter/gate
-   interpreter/adiabatic
-   interpreter/planar
+   interpreter/clock
+   interpreter/planar_clock
    interpreter/tensor

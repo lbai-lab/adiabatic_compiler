@@ -9,7 +9,7 @@ from frontend.clock import *
 from interpreter import *
 
 
-class AdiabaticInterpreter(Interpreter):
+class ClockInterpreter(Interpreter):
     """
     The interpreter built based on Section 3  (5-local) and Section 4 (3-local)
     from this paper: https://arxiv.org/abs/quant-ph/0405098,
