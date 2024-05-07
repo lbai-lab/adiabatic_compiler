@@ -2,10 +2,10 @@ import scipy.sparse as sp
 from qiskit import QuantumCircuit
 from qiskit.quantum_info import Operator
 
+from backend.cpu import CPUBackend
 from frontend.compress import *
 from frontend.tensor import *
 from interpreter import Interpreter
-from backend.cpu import CPUBackend
 
 
 class TensorInterpreter(Interpreter):
@@ -24,20 +24,20 @@ class TensorInterpreter(Interpreter):
     def run(self, qc: QuantumCircuit, num_shots=1024, all_histories=False) -> dict:
         assert qc.num_qubits == 2, "Currently only support 2-qubit system"
 
-        gates = compress_circuit(qc, Compress.parallel)[0]
-        unitaries = [sp.csc_matrix(Operator(x)) for x in gates]
-
         # TODO: for n-qubit case, calculate the actual depth
+        gates = compress_circuit(qc, Compress.parallel)[0]
         n = qc.num_qubits
-        D = len(unitaries)
-        if self.eps is None:
-            self.eps = (D + 1) ** (-0.51)  # originally poly(D) ** (-0.51)
+        D = len(gates)
 
+        if self.eps is None:
+            self.eps = (D + 1) ** (-0.51)
+
+        unitaries = [sp.csc_matrix(Operator(x)) for x in gates]
         program = TensorFrontend(self.eps).unitaries_to_program(unitaries, n, D)
 
         raw_results = CPUBackend().run(program, num_shots)
         if all_histories:
-            return raw_results
+            return {f"({k[:-n]})\n{k[-n:]}": v for k, v in raw_results.items()}
 
         results = {}
         valid_states = ["00", "11"]

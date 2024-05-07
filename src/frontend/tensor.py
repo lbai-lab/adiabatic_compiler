@@ -166,7 +166,7 @@ class TensorFrontend(Frontend):
                 (lamb_end @ self.encode_U(Us[-1], True) @ lamb_end).toarray(),
                 check_input=False,
             ),
-            range(total - 6, total),
+            range(total - 6, total),  # TODO this is for 2-qubit circuit only
         )
 
         h_u_sum = sp.csc_matrix(Operator(qc))
@@ -182,7 +182,7 @@ class TensorFrontend(Frontend):
                     (lamb_4 @ self.encode_U(Us[i], False) @ lamb_4).toarray(),
                     check_input=False,
                 ),
-                range(q_i, q_i + 8),
+                range(q_i, q_i + 8), # TODO this is for 2-qubit circuit only
             )
 
             h_u_sum += sp.csc_matrix(Operator(qc))
@@ -201,5 +201,5 @@ class TensorFrontend(Frontend):
 
         total = num_qubits * (2 * depth + 1)
         return TensorAdiabaticProgram(
-            H_in + H_out, H_in + H_out + H_prop, 2**total, total, total
+            H_in, H_in + H_prop + H_out, 2**total, total, total
         )
